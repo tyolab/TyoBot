@@ -33,7 +33,7 @@
 
     <!-- parse fields                                       -->
     <field name="title" column="title" length="512"/>
-    <field name="text" column="text" length="32000"/>
+    <field name="text" column="text" length="21845"/>
     <field name="parseStatus" column="parseStatus"/>
     <field name="signature" column="signature"/>
     <field name="prevSignature" column="prevSignature"/>
