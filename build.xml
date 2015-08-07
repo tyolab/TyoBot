@@ -298,7 +298,7 @@
    <fileset dir="lib/native" />
   </copy>
   <copy todir="${runtime.local}/conf">
-   <fileset dir="conf" excludes="*.template" />
+   <fileset dir="${conf.dir}" excludes="*.template" />
   </copy>
   <copy todir="${runtime.local}/bin">
    <fileset dir="src/bin" />
@@ -605,7 +605,7 @@
 
  <target name="default-doc" description="--> generate default Nutch documentation">
   <style basedir="${conf.dir}" destdir="${docs.dir}" 
-  	includes="nutch-default.xml" style="conf/nutch-conf.xsl" />
+  	includes="nutch-default.xml" style="${conf.dir}/nutch-conf.xsl" />
  </target>
 
  <!-- ================================================================== -->
