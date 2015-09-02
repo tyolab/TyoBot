@@ -53,14 +53,17 @@ import org.apache.nutch.util.ToolUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** This class takes a flat file of URLs and adds them to the of pages to be
- * crawled.  Useful for bootstrapping the system.
- * The URL files contain one URL per line, optionally followed by custom metadata
- * separated by tabs with the metadata key separated from the corresponding value by '='. <br>
+/**
+ * This class takes a flat file of URLs and adds them to the of pages to be
+ * crawled. Useful for bootstrapping the system. The URL files contain one URL
+ * per line, optionally followed by custom metadata separated by tabs with the
+ * metadata key separated from the corresponding value by '='. <br>
  * Note that some metadata keys are reserved : <br>
  * - <i>nutch.score</i> : allows to set a custom score for a specific URL <br>
- * - <i>nutch.fetchInterval</i> : allows to set a custom fetch interval for a specific URL <br>
- * e.g. http://www.nutch.org/ \t nutch.score=10 \t nutch.fetchInterval=2592000 \t userType=open_source
+ * - <i>nutch.fetchInterval</i> : allows to set a custom fetch interval for a
+ * specific URL <br>
+ * e.g. http://www.nutch.org/ \t nutch.score=10 \t nutch.fetchInterval=2592000
+ * \t userType=open_source
  **/
 public class InjectorJob extends NutchTool implements Tool {
 
@@ -94,16 +97,19 @@ public class InjectorJob extends NutchTool implements Tool {
     @Override
     protected void setup(Context context) throws IOException,
         InterruptedException {
-      urlNormalizers = new URLNormalizers(context.getConfiguration(),
-          URLNormalizers.SCOPE_INJECT);
-      interval = context.getConfiguration().getInt("db.fetch.interval.default",
-          2592000);
+      urlNormalizers =
+          new URLNormalizers(context.getConfiguration(),
+              URLNormalizers.SCOPE_INJECT);
+      interval =
+          context.getConfiguration().getInt("db.fetch.interval.default",
+              2592000);
       filters = new URLFilters(context.getConfiguration());
       scfilters = new ScoringFilters(context.getConfiguration());
-      scoreInjected = context.getConfiguration().getFloat("db.score.injected",
-          1.0f);
-      curTime = context.getConfiguration().getLong("injector.current.time",
-          System.currentTimeMillis());
+      scoreInjected =
+          context.getConfiguration().getFloat("db.score.injected", 1.0f);
+      curTime =
+          context.getConfiguration().getLong("injector.current.time",
+              System.currentTimeMillis());
     }
 
     @Override
@@ -142,15 +148,20 @@ public class InjectorJob extends NutchTool implements Tool {
             metadata.put(metaname, metavalue);
         }
       }
+      String normalisedUrl = null;
       try {
-        url = urlNormalizers.normalize(url, URLNormalizers.SCOPE_INJECT);
-        url = filters.filter(url); // filter the url
+        normalisedUrl =
+            urlNormalizers.normalize(url, URLNormalizers.SCOPE_INJECT);
+        url = filters.filter(normalisedUrl); // filter the url
       } catch (Exception e) {
         LOG.warn("Skipping " + url + ":" + e);
         url = null;
       }
-      if (url == null)
+      if (url == null) {
+        if (null != normalisedUrl)
+          LOG.info("Skipping " + url);
         return;
+      }
 
       String reversedUrl = TableUtil.reverseUrl(url);
       WebPage row = new WebPage();
@@ -160,25 +171,25 @@ public class InjectorJob extends NutchTool implements Tool {
       // now add the metadata
       Iterator<String> keysIter = metadata.keySet().iterator();
       while (keysIter.hasNext()) {
-          String keymd = keysIter.next();
-          String valuemd = metadata.get(keymd);
-          row.putToMetadata(new Utf8(keymd), ByteBuffer.wrap(valuemd.getBytes()));
+        String keymd = keysIter.next();
+        String valuemd = metadata.get(keymd);
+        row.putToMetadata(new Utf8(keymd), ByteBuffer.wrap(valuemd.getBytes()));
       }
 
       if (customScore != -1)
-    	  row.setScore(customScore);
+        row.setScore(customScore);
       else
-    	  row.setScore(scoreInjected);
+        row.setScore(scoreInjected);
 
       try {
-    	  scfilters.injectedScore(url, row);
+        scfilters.injectedScore(url, row);
       } catch (ScoringFilterException e) {
-    	  if (LOG.isWarnEnabled()) {
-    		  LOG.warn("Cannot filter injected score for url " + url
-    				  + ", using default (" + e.getMessage() + ")");
-    	  }
+        if (LOG.isWarnEnabled()) {
+          LOG.warn("Cannot filter injected score for url " + url
+              + ", using default (" + e.getMessage() + ")");
+        }
       }
-      
+
       row.putToMarkers(DbUpdaterJob.DISTANCE, new Utf8(String.valueOf(0)));
 
       Mark.INJECT_MARK.putMark(row, YES_STRING);
@@ -194,12 +205,12 @@ public class InjectorJob extends NutchTool implements Tool {
     setConf(conf);
   }
 
-  public Map<String,Object> run(Map<String,Object> args) throws Exception {
+  public Map<String, Object> run(Map<String, Object> args) throws Exception {
     getConf().setLong("injector.current.time", System.currentTimeMillis());
     Path input;
     Object path = args.get(Nutch.ARG_SEEDDIR);
     if (path instanceof Path) {
-      input = (Path)path;
+      input = (Path) path;
     } else {
       input = new Path(path.toString());
     }
@@ -211,8 +222,9 @@ public class InjectorJob extends NutchTool implements Tool {
     currentJob.setMapOutputKeyClass(String.class);
     currentJob.setMapOutputValueClass(WebPage.class);
     currentJob.setOutputFormatClass(GoraOutputFormat.class);
-    DataStore<String, WebPage> store = StorageUtils.createWebStore(currentJob.getConfiguration(),
-        String.class, WebPage.class);
+    DataStore<String, WebPage> store =
+        StorageUtils.createWebStore(currentJob.getConfiguration(),
+            String.class, WebPage.class);
     GoraOutputFormat.setOutput(currentJob, store, true);
     currentJob.setReducerClass(Reducer.class);
     currentJob.setNumReduceTasks(0);
@@ -236,7 +248,7 @@ public class InjectorJob extends NutchTool implements Tool {
     }
     for (int i = 1; i < args.length; i++) {
       if ("-crawlId".equals(args[i])) {
-        getConf().set(Nutch.CRAWL_ID_KEY, args[i+1]);
+        getConf().set(Nutch.CRAWL_ID_KEY, args[i + 1]);
         i++;
       } else {
         System.err.println("Unrecognized arg " + args[i]);
@@ -255,7 +267,8 @@ public class InjectorJob extends NutchTool implements Tool {
   }
 
   public static void main(String[] args) throws Exception {
-    int res = ToolRunner.run(NutchConfiguration.create(), new InjectorJob(), args);
+    int res =
+        ToolRunner.run(NutchConfiguration.create(), new InjectorJob(), args);
     System.exit(res);
   }
 }
