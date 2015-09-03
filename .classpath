@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="runtime/local/conf"/>
 	<classpathentry kind="src" path="src/java"/>
-	<classpathentry kind="src" path="src/plugin/lib-nekohtml/test/java"/>
-	<classpathentry kind="src" path="src/plugin/lib-nekohtml/src"/>
 	<classpathentry kind="src" output="build/test/classes" path="src/test"/>
 	<classpathentry kind="src" path="src/plugin/creativecommons/src/java"/>
 	<classpathentry kind="src" path="src/plugin/creativecommons/src/test"/>
@@ -151,7 +150,6 @@
 	<classpathentry kind="lib" path="runtime/local/lib/zookeeper-3.3.1.jar"/>
 	<classpathentry kind="lib" path="/hadoop-1.0.3/lib/jasper-compiler-5.5.12.jar"/>
 	<classpathentry kind="lib" path="/apache-nutch-2.3/build/plugins/urlfilter-automaton/automaton-1.11-8.jar"/>
-	<classpathentry kind="lib" path="runtime/local/conf"/>
 	<classpathentry kind="lib" path="lib/plugins/apache-mime4j-core-0.7.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/apache-mime4j-dom-0.7.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/asm-3.1.jar"/>

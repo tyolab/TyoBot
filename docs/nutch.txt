@@ -1,0 +1,4 @@
+
+==== FETCHER JOB =====
+
+SELECT id,markers,modifiedTime,headers,reprUrl,fetchTime FROM webpage LIMIT 10000;

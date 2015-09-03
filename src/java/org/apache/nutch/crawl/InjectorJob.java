@@ -159,7 +159,7 @@ public class InjectorJob extends NutchTool implements Tool {
       }
       if (url == null) {
         if (null != normalisedUrl)
-          LOG.info("Skipping " + url);
+          LOG.info("Skipping " + normalisedUrl);
         return;
       }
 

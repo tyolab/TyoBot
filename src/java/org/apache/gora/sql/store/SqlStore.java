@@ -78,22 +78,20 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
 /**
- * A DataStore implementation for RDBMS with a SQL interface. SqlStore
- * uses JDBC drivers to communicate with the DB.
+ * A DataStore implementation for RDBMS with a SQL interface. SqlStore uses JDBC
+ * drivers to communicate with the DB.
  */
 public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
   /** The vendor of the DB */
   public static enum DBVendor {
-    MYSQL,
-    HSQL,
-    GENERIC;
+    MYSQL, HSQL, GENERIC;
 
     static DBVendor getVendor(String dbProductName) {
       String name = dbProductName.toLowerCase();
-      if(name.contains("mysql"))
+      if (name.contains("mysql"))
         return MYSQL;
-      else if(name.contains("hsql"))
+      else if (name.contains("hsql"))
         return HSQL;
       return GENERIC;
     }
@@ -122,10 +120,11 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
   private SqlMapping mapping;
 
-  private Connection connection; //no connection pooling yet
+  private Connection connection; // no connection pooling yet
 
   private DatabaseMetaData metadata;
-  private boolean dbMixedCaseIdentifiers, dbLowerCaseIdentifiers, dbUpperCaseIdentifiers;
+  private boolean dbMixedCaseIdentifiers, dbLowerCaseIdentifiers,
+      dbUpperCaseIdentifiers;
   private HashMap<String, JdbcType> dbTypeMap;
 
   private HashSet<PreparedStatement> writeCache;
@@ -145,17 +144,20 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       Properties properties) throws IOException {
     super.initialize(keyClass, persistentClass, properties);
 
-    jdbcDriverClass = DataStoreFactory.findProperty(properties
-        , this, DRIVER_CLASS_PROPERTY, null);
-    jdbcUrl = DataStoreFactory.findProperty(properties
-        , this, URL_PROPERTY, null);
-    jdbcUsername = DataStoreFactory.findProperty(properties
-        , this, USERNAME_PROPERTY, null);
-    jdbcPassword = DataStoreFactory.findProperty(properties
-        , this, PASSWORD_PROPERTY, null);
+    jdbcDriverClass =
+        DataStoreFactory.findProperty(properties, this, DRIVER_CLASS_PROPERTY,
+            null);
+    jdbcUrl =
+        DataStoreFactory.findProperty(properties, this, URL_PROPERTY, null);
+    jdbcUsername =
+        DataStoreFactory
+            .findProperty(properties, this, USERNAME_PROPERTY, null);
+    jdbcPassword =
+        DataStoreFactory
+            .findProperty(properties, this, PASSWORD_PROPERTY, null);
 
-    String mappingFile = DataStoreFactory.getMappingFile(properties, this
-        , DEFAULT_MAPPING_FILE);
+    String mappingFile =
+        DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
 
     connection = getConnection();
     initDbMetadata();
@@ -168,7 +170,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
     keySqlType = SqlTypeInterface.getSqlType(keyClass);
 
-    if(autoCreateSchema) {
+    if (autoCreateSchema) {
       createSchema();
     }
 
@@ -183,16 +185,16 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   @Override
   public void close() throws IOException {
     flush();
-    if(connection!=null) {
+    if (connection != null) {
       try {
         connection.commit();
-        if(dbVendor == DBVendor.HSQL && jdbcUrl.contains(":file:")) {
+        if (dbVendor == DBVendor.HSQL && jdbcUrl.contains(":file:")) {
           connection.prepareStatement("SHUTDOWN").executeUpdate();
         }
         connection.close();
       } catch (SQLException ex) {
-        if(!ex.getMessage().contains("closed")) {
-          throw new IOException(ex); 
+        if (!ex.getMessage().contains("closed")) {
+          throw new IOException(ex);
         }
       }
     }
@@ -200,21 +202,22 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
   private void setColumnConstraintForQuery(CreateTableQuery query, Column column) {
     ColumnConstraint constraint = getColumnConstraint(column);
-    if(constraint != null) {
-      query.setColumnConstraint(sqlTable.findColumn(column.getName()), constraint);
+    if (constraint != null) {
+      query.setColumnConstraint(sqlTable.findColumn(column.getName()),
+          constraint);
     }
   }
 
   @Override
   public void createSchema() throws IOException {
-    if(!schemaExists()) {
+    if (!schemaExists()) {
 
       log.info("creating schema: " + sqlTable.getAbsoluteName());
 
       CreateTableQuery query = new CreateTableQuery(sqlTable, true);
 
       setColumnConstraintForQuery(query, primaryColumn);
-      for(Column column : mapping.getFields().values()) {
+      for (Column column : mapping.getFields().values()) {
         setColumnConstraintForQuery(query, column);
       }
 
@@ -231,7 +234,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   private ColumnConstraint getColumnConstraint(Column column) {
-    if(column.isPrimaryKey()) {
+    if (column.isPrimaryKey()) {
       return ColumnConstraint.PRIMARY_KEY;
     }
     return null;
@@ -240,14 +243,15 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   @Override
   public void deleteSchema() throws IOException {
     flush();
-    if(schemaExists()) {
+    if (schemaExists()) {
       PreparedStatement statement = null;
       try {
         log.info("dropping schema:" + sqlTable.getAbsoluteName());
 
-        //DropQuery does not work
-        statement = connection.prepareStatement(
-            "DROP TABLE " + sqlTable.getAbsoluteName());
+        // DropQuery does not work
+        statement =
+            connection.prepareStatement("DROP TABLE "
+                + sqlTable.getAbsoluteName());
         statement.executeUpdate();
 
         connection.commit();
@@ -268,7 +272,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
       resultSet = metadata.getTables(null, null, tableName, null);
 
-      if(resultSet.next())
+      if (resultSet.next())
         return true;
 
     } catch (Exception ex) {
@@ -283,8 +287,8 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   @Override
   public boolean delete(K key) throws IOException {
     Delete delete = new Delete();
-    delete.from(sqlTable.getName())
-          .where().equals(primaryColumn.getName(), "?");
+    delete.from(sqlTable.getName()).where()
+        .equals(primaryColumn.getName(), "?");
 
     PreparedStatement statement = null;
     try {
@@ -323,7 +327,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   public void flush() throws IOException {
     Exception deferred = null;
     synchronized (writeCache) {
-      for(PreparedStatement stmt : writeCache) {
+      for (PreparedStatement stmt : writeCache) {
         try {
           stmt.executeBatch();
         } catch (SQLException ex) {
@@ -331,12 +335,12 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
           break;
         }
       }
-      for(PreparedStatement stmt : writeCache) {
+      for (PreparedStatement stmt : writeCache) {
         SqlUtils.close(stmt);
       }
       writeCache.clear();
     }
-    if(deferred != null)
+    if (deferred != null)
       throw new IOException(deferred);
     try {
       connection.commit();
@@ -356,16 +360,17 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       SelectStatement select = new SelectStatement(mapping.getTableName());
       select.setWhere(where);
 
-//      boolean isPrimarySelected = false;
-//      for (int i = 0; i < requestFields.length; i++) {
-//        if(primaryColumn.getName().equals(primaryColumn)) {
-//          isPrimarySelected = true;
-//          break;
-//        }
-//      }
-//      if(!isPrimarySelected) {
-//        requestFields = StringUtils.append(requestFields, primaryColumn.getName());
-//      }
+      // boolean isPrimarySelected = false;
+      // for (int i = 0; i < requestFields.length; i++) {
+      // if(primaryColumn.getName().equals(primaryColumn)) {
+      // isPrimarySelected = true;
+      // break;
+      // }
+      // }
+      // if(!isPrimarySelected) {
+      // requestFields = StringUtils.append(requestFields,
+      // primaryColumn.getName());
+      // }
 
       for (int i = 0; i < requestFields.length; i++) {
         Column column = mapping.getColumn(requestFields[i]);
@@ -380,7 +385,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
       resultSet = statement.executeQuery();
 
-      if(!resultSet.next()) { //no matching result
+      if (!resultSet.next()) { // no matching result
         return null;
       }
 
@@ -412,7 +417,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
         select.addToSelectList(column.getName());
       }
 
-      if(query.getLimit() > 0) {
+      if (query.getLimit() > 0) {
         select.setLimit(query.getLimit());
       }
 
@@ -428,7 +433,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     }
   }
 
-  private Where constructWhereClause(Query<K,T> query) {
+  private Where constructWhereClause(Query<K, T> query) {
     Where where = new Where();
     if (query.getKey() != null) {
       where.equals(primaryColumn.getName(), "?");
@@ -436,24 +441,26 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       if (query.getStartKey() != null) {
         where.greaterThanEq(primaryColumn.getName(), "?");
       }
-      if(query.getEndKey() != null) {
+      if (query.getEndKey() != null) {
         where.lessThanEq(primaryColumn.getName(), "?");
       }
     }
     return where;
   }
 
-  private void setParametersForPreparedStatement(PreparedStatement statement
-      , Query<K,T> query) throws SQLException, IOException {
+  private void setParametersForPreparedStatement(PreparedStatement statement,
+      Query<K, T> query) throws SQLException, IOException {
     int offset = 1;
-    if(query.getKey() != null) {
+    if (query.getKey() != null) {
       setObject(statement, offset++, query.getKey(), keySqlType, primaryColumn);
     } else {
-      if(query.getStartKey() != null) {
-        setObject(statement, offset++, query.getStartKey(), keySqlType, primaryColumn);
+      if (query.getStartKey() != null) {
+        setObject(statement, offset++, query.getStartKey(), keySqlType,
+            primaryColumn);
       }
-      if(query.getEndKey() != null) {
-        setObject(statement, offset++, query.getEndKey(), keySqlType, primaryColumn);
+      if (query.getEndKey() != null) {
+        setObject(statement, offset++, query.getEndKey(), keySqlType,
+            primaryColumn);
       }
     }
   }
@@ -463,13 +470,13 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     return (K) resultSet.getObject(primaryColumn.getName());
   }
 
-  public T readObject(ResultSet rs, T persistent
-      , String[] requestFields) throws SQLException, IOException {
-    if(rs == null) {
+  public T readObject(ResultSet rs, T persistent, String[] requestFields)
+      throws SQLException, IOException {
+    if (rs == null) {
       return null;
     }
 
-    for(int i=0; i<requestFields.length; i++) {
+    for (int i = 0; i < requestFields.length; i++) {
       String f = requestFields[i];
       Field field = fieldMap.get(f);
       Schema fieldSchema = field.schema();
@@ -481,49 +488,56 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       if (rs.getObject(columnIndex) == null) {
         continue;
       }
-      switch(type) {
-        case MAP:
-          readField(rs, columnIndex, persistent.get(field.pos()), fieldSchema, column);
-          break;
-        case ARRAY:
-          readField(rs, columnIndex, persistent.get(field.pos()), fieldSchema, column);
-          break;
-        case BOOLEAN:
-          persistent.put(field.pos(), rs.getBoolean(columnIndex));
-          break;
-        case BYTES:
-          persistent.put(field.pos(), ByteBuffer.wrap(getBytes(rs, columnIndex, fieldSchema, column)));
-          break;
-        case DOUBLE:
-          persistent.put(field.pos(), rs.getDouble(columnIndex));
-          break;
-        case ENUM:
-          Object val = AvroUtils.getEnumValue(fieldSchema, rs.getString(columnIndex));
-          persistent.put(field.pos(), val);
-          break;
-        case FIXED:
-          ((SpecificFixed)persistent.get(i)).bytes(getBytes(rs, columnIndex, fieldSchema, column));
-          break;
-        case FLOAT:
-          persistent.put(field.pos(), rs.getFloat(columnIndex));
-          break;
-        case INT:
-          persistent.put(field.pos(), rs.getInt(columnIndex));
-          break;
-        case LONG:
-          persistent.put(field.pos(), rs.getLong(columnIndex));
-          break;
-        case NULL:
-          break;
-        case RECORD:
-          Object o = readField(rs, columnIndex, persistent.get(field.pos()), fieldSchema, column);
-          persistent.put(field.pos(), o);
-          break;
-        case STRING:
-          persistent.put(field.pos(), new Utf8(rs.getString(columnIndex)));
-          break;
-        case UNION:
-          throw new IOException("Union is not supported yet");
+      switch (type) {
+      case MAP:
+        readField(rs, columnIndex, persistent.get(field.pos()), fieldSchema,
+            column);
+        break;
+      case ARRAY:
+        readField(rs, columnIndex, persistent.get(field.pos()), fieldSchema,
+            column);
+        break;
+      case BOOLEAN:
+        persistent.put(field.pos(), rs.getBoolean(columnIndex));
+        break;
+      case BYTES:
+        persistent.put(field.pos(),
+            ByteBuffer.wrap(getBytes(rs, columnIndex, fieldSchema, column)));
+        break;
+      case DOUBLE:
+        persistent.put(field.pos(), rs.getDouble(columnIndex));
+        break;
+      case ENUM:
+        Object val =
+            AvroUtils.getEnumValue(fieldSchema, rs.getString(columnIndex));
+        persistent.put(field.pos(), val);
+        break;
+      case FIXED:
+        ((SpecificFixed) persistent.get(i)).bytes(getBytes(rs, columnIndex,
+            fieldSchema, column));
+        break;
+      case FLOAT:
+        persistent.put(field.pos(), rs.getFloat(columnIndex));
+        break;
+      case INT:
+        persistent.put(field.pos(), rs.getInt(columnIndex));
+        break;
+      case LONG:
+        persistent.put(field.pos(), rs.getLong(columnIndex));
+        break;
+      case NULL:
+        break;
+      case RECORD:
+        Object o =
+            readField(rs, columnIndex, persistent.get(field.pos()),
+                fieldSchema, column);
+        persistent.put(field.pos(), o);
+        break;
+      case STRING:
+        persistent.put(field.pos(), new Utf8(rs.getString(columnIndex)));
+        break;
+      case UNION:
+        throw new IOException("Union is not supported yet");
       }
       persistent.setDirty(field.pos());
     }
@@ -531,48 +545,61 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     return persistent;
   }
 
-  protected byte[] getBytes(ResultSet resultSet, int columnIndex, Schema schema, Column column)
-    throws SQLException, IOException {
-    switch(column.getJdbcType()) {
-      case BLOB          : Blob blob = resultSet.getBlob(columnIndex);
-                           return IOUtils.readFully(blob.getBinaryStream());
-      case BINARY        :
-      case VARBINARY     : return resultSet.getBytes(columnIndex);
-      case LONGVARBINARY : return IOUtils.readFully(resultSet.getBinaryStream(columnIndex));
+  protected byte[] getBytes(ResultSet resultSet, int columnIndex,
+      Schema schema, Column column) throws SQLException, IOException {
+    switch (column.getJdbcType()) {
+    case BLOB:
+      Blob blob = resultSet.getBlob(columnIndex);
+      return IOUtils.readFully(blob.getBinaryStream());
+    case BINARY:
+    case VARBINARY:
+      return resultSet.getBytes(columnIndex);
+    case LONGVARBINARY:
+      return IOUtils.readFully(resultSet.getBinaryStream(columnIndex));
     }
     return null;
   }
 
-  protected Object readField(ResultSet resultSet, int columnIndex, Object field
-      , Schema schema, Column column) throws SQLException, IOException {
+  protected Object readField(ResultSet resultSet, int columnIndex,
+      Object field, Schema schema, Column column) throws SQLException,
+      IOException {
 
     InputStream is = null;
     byte[] bytes = null;
 
-    JdbcType type = JdbcType.get(resultSet.getMetaData().getColumnType(columnIndex));
+    JdbcType type =
+        JdbcType.get(resultSet.getMetaData().getColumnType(columnIndex));
 
-    switch(type) {
-      case BLOB          : Blob blob = resultSet.getBlob(columnIndex);
-                           if (blob != null) is = blob.getBinaryStream(); break;
-      case BINARY        :
-      case VARBINARY     : bytes = resultSet.getBytes(columnIndex); break;
-      case LONGVARBINARY : is = resultSet.getBinaryStream(columnIndex); break;
+    switch (type) {
+    case BLOB:
+      Blob blob = resultSet.getBlob(columnIndex);
+      if (blob != null)
+        is = blob.getBinaryStream();
+      break;
+    case BINARY:
+    case VARBINARY:
+      bytes = resultSet.getBytes(columnIndex);
+      break;
+    case LONGVARBINARY:
+      is = resultSet.getBinaryStream(columnIndex);
+      break;
     }
 
-    if(bytes!=null)
+    if (bytes != null)
       return IOUtils.deserialize(bytes, datumReader, schema, field);
-    else if(is != null)
+    else if (is != null)
       return IOUtils.deserialize(is, datumReader, schema, field);
-    return field; //field is empty
+    return field; // field is empty
   }
 
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-  throws IOException {
-    //TODO: implement this using Hadoop DB support
+      throws IOException {
+    // TODO: implement this using Hadoop DB support
 
-    ArrayList<PartitionQuery<K,T>> partitions = new ArrayList<PartitionQuery<K,T>>();
-    partitions.add(new PartitionQueryImpl<K,T>(query));
+    ArrayList<PartitionQuery<K, T>> partitions =
+        new ArrayList<PartitionQuery<K, T>>();
+    partitions.add(new PartitionQueryImpl<K, T>(query));
 
     return partitions;
   }
@@ -586,7 +613,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   public void put(K key, T persistent) throws IOException {
     boolean hasDirty = false;
     try {
-      //TODO: INSERT or UPDATE
+      // TODO: INSERT or UPDATE
 
       Schema schema = persistent.getSchema();
       StateManager stateManager = persistent.getStateManager();
@@ -594,7 +621,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       List<Field> fields = schema.getFields();
 
       InsertUpdateStatement<K, T> insertStatement =
-        InsertUpdateStatementFactory.createStatement(this, mapping, dbVendor);
+          InsertUpdateStatementFactory.createStatement(this, mapping, dbVendor);
 
       insertStatement.setObject(key, null, mapping.getPrimaryColumn());
       for (int i = 0; i < fields.size(); i++) {
@@ -612,14 +639,14 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
         return;
       }
 
-      //jdbc already should cache the ps
+      // jdbc already should cache the ps
       PreparedStatement insert = insertStatement.toStatement(connection);
       insert.addBatch();
       synchronized (writeCache) {
         writeCache.add(insert);
       }
 
-    }catch (Exception ex) {
+    } catch (Exception ex) {
       throw new IOException(ex);
     }
   }
@@ -627,104 +654,114 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   /**
    * Sets the object to the preparedStatement by it's schema
    */
-  public void setObject(PreparedStatement statement, int index, Object object
-      , Schema schema, Column column) throws SQLException, IOException {
+  public void setObject(PreparedStatement statement, int index, Object object,
+      Schema schema, Column column) throws SQLException, IOException {
 
     Type type = schema.getType();
 
-    switch(type) {
-      case MAP:
-        setField(statement, column, schema, index, object);
-        break;
-      case ARRAY:
-        setField(statement, column, schema, index, object);
-        break;
-      case BOOLEAN:
-        statement.setBoolean(index, (Boolean)object);
-        break;
-      case BYTES:
-        setBytes(statement, column, index, ((ByteBuffer)object).array());
-        break;
-      case DOUBLE:
-        statement.setDouble(index, (Double)object);
-        break;
-      case ENUM:
-        statement.setString(index, ((Enum<?>)object).name());
-        break;
-      case FIXED:
-        setBytes(statement, column, index, ((GenericFixed)object).bytes());
-        break;
-      case FLOAT:
-        statement.setFloat(index, (Float)object);
-        break;
-      case INT:
-        statement.setInt(index, (Integer)object);
-        break;
-      case LONG:
-        statement.setLong(index, (Long)object);
-        break;
-      case NULL:
-        break;
-      case RECORD:
-        setField(statement, column, schema, index, object);
-        break;
-      case STRING:
-        statement.setString(index, ((Utf8)object).toString());
-        break;
-      case UNION:
-        throw new IOException("Union is not supported yet");
+    switch (type) {
+    case MAP:
+      setField(statement, column, schema, index, object);
+      break;
+    case ARRAY:
+      setField(statement, column, schema, index, object);
+      break;
+    case BOOLEAN:
+      statement.setBoolean(index, (Boolean) object);
+      break;
+    case BYTES:
+      setBytes(statement, column, index, ((ByteBuffer) object).array());
+      break;
+    case DOUBLE:
+      statement.setDouble(index, (Double) object);
+      break;
+    case ENUM:
+      statement.setString(index, ((Enum<?>) object).name());
+      break;
+    case FIXED:
+      setBytes(statement, column, index, ((GenericFixed) object).bytes());
+      break;
+    case FLOAT:
+      statement.setFloat(index, (Float) object);
+      break;
+    case INT:
+      statement.setInt(index, (Integer) object);
+      break;
+    case LONG:
+      statement.setLong(index, (Long) object);
+      break;
+    case NULL:
+      break;
+    case RECORD:
+      setField(statement, column, schema, index, object);
+      break;
+    case STRING:
+      statement.setString(index, ((Utf8) object).toString());
+      break;
+    case UNION:
+      throw new IOException("Union is not supported yet");
     }
   }
 
-  protected <V> void setObject(PreparedStatement statement, int index, V object
-      , int objectType, Column column) throws SQLException, IOException {
+  protected <V> void setObject(PreparedStatement statement, int index,
+      V object, int objectType, Column column) throws SQLException, IOException {
     statement.setObject(index, object, objectType, column.getScaleOrLength());
   }
 
-  protected void setBytes(PreparedStatement statement, Column column, int index, byte[] value)
-  throws SQLException   {
+  protected void setBytes(PreparedStatement statement, Column column,
+      int index, byte[] value) throws SQLException {
 
-    switch(column.getJdbcType()) {
-      case BLOB:
-        statement.setBlob(index, new ByteArrayInputStream(value), value.length);
-        break;
-      case BINARY: case VARBINARY:
-        statement.setBytes(index, value);
-        break;
-      case LONGVARBINARY:
-        statement.setBinaryStream(index, new ByteArrayInputStream(value));
-        break;
+    switch (column.getJdbcType()) {
+    case BLOB:
+      statement.setBlob(index, new ByteArrayInputStream(value), value.length);
+      break;
+    case BINARY:
+    case VARBINARY:
+      statement.setBytes(index, value);
+      break;
+    case LONGVARBINARY:
+      statement.setBinaryStream(index, new ByteArrayInputStream(value));
+      break;
     }
   }
 
   /** Serializes the field using Avro to a BLOB field */
-  protected void setField(PreparedStatement statement, Column column, Schema schema
-      , int index, Object object)
-  throws IOException, SQLException {
+  protected void setField(PreparedStatement statement, Column column,
+      Schema schema, int index, Object object) throws IOException, SQLException {
 
     OutputStream os = null;
     Blob blob = null;
 
     JdbcType type = column.getJdbcType();
 
-    switch(type) {
-      case BLOB          : blob = connection.createBlob();
-                           os = blob.setBinaryStream(1); break;
-      case BINARY        :
-      case VARBINARY     :
-      case LONGVARBINARY : os = new ByteBufferOutputStream(); break;
+    switch (type) {
+    case BLOB:
+      blob = connection.createBlob();
+      os = blob.setBinaryStream(1);
+      break;
+    case BINARY:
+    case VARBINARY:
+    case LONGVARBINARY:
+      os = new ByteBufferOutputStream();
+      break;
     }
 
     IOUtils.serialize(os, datumWriter, schema, object);
     os.close();
 
-    switch(type) {
-      case BLOB          : statement.setBlob(index, blob); break;
-      case BINARY        :
-      case VARBINARY     : statement.setBytes(index
-          , IOUtils.getAsBytes(((ByteBufferOutputStream)os).getBufferList())); break;
-      case LONGVARBINARY : statement.setBinaryStream(index,
-          new ByteBufferInputStream(((ByteBufferOutputStream)os).getBufferList())); break;
+    switch (type) {
+    case BLOB:
+      statement.setBlob(index, blob);
+      break;
+    case BINARY:
+    case VARBINARY:
+      statement.setBytes(index,
+          IOUtils.getAsBytes(((ByteBufferOutputStream) os).getBufferList()));
+      break;
+    case LONGVARBINARY:
+      statement.setBinaryStream(index, new ByteBufferInputStream(
+          ((ByteBufferOutputStream) os).getBufferList()));
+      break;
     }
   }
 
@@ -733,11 +770,11 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       Connection connection = null;
 
       Class.forName(jdbcDriverClass);
-      if(jdbcUsername == null || jdbcUsername.length() == 0) {
+      if (jdbcUsername == null || jdbcUsername.length() == 0) {
         connection = DriverManager.getConnection(jdbcUrl);
       } else {
-        connection = DriverManager.getConnection(jdbcUrl, jdbcUsername,
-            jdbcPassword);
+        connection =
+            DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
       }
 
       connection.setAutoCommit(false);
@@ -755,13 +792,13 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       dbMixedCaseIdentifiers = metadata.storesMixedCaseIdentifiers();
       dbLowerCaseIdentifiers = metadata.storesLowerCaseIdentifiers();
       dbUpperCaseIdentifiers = metadata.storesUpperCaseIdentifiers();
-      dbProductName          = metadata.getDatabaseProductName();
-      dbVendor               = DBVendor.getVendor(dbProductName);
+      dbProductName = metadata.getDatabaseProductName();
+      dbVendor = DBVendor.getVendor(dbProductName);
 
       ResultSet rs = metadata.getTypeInfo();
       dbTypeMap = new HashMap<String, JdbcType>();
 
-      while(rs.next()) {
+      while (rs.next()) {
         JdbcType type = JdbcType.get(rs.getInt("DATA_TYPE"));
         dbTypeMap.put(rs.getString("TYPE_NAME"), type);
       }
@@ -773,13 +810,12 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   protected String getIdentifier(String identifier) {
-    if(identifier == null)
+    if (identifier == null)
       return identifier;
-    if(!dbMixedCaseIdentifiers) {
-      if(dbLowerCaseIdentifiers) {
+    if (!dbMixedCaseIdentifiers) {
+      if (dbLowerCaseIdentifiers) {
         return identifier.toLowerCase();
-      }
-      else if(dbUpperCaseIdentifiers) {
+      } else if (dbUpperCaseIdentifiers) {
         return identifier.toUpperCase();
       }
     }
@@ -787,7 +823,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   private void addColumn(DbTable table, Column column) {
-    Integer length =  column.getScaleOrLength();
+    Integer length = column.getScaleOrLength();
     length = length > 0 ? length : null;
     table.addColumn(column.getName(), column.getSqlType(), length);
   }
@@ -800,7 +836,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     DbTable table = schema.addTable(mapping.getTableName());
 
     addColumn(table, primaryColumn);
-    for(Map.Entry<String, Column> entry : mapping.getFields().entrySet()) {
+    for (Map.Entry<String, Column> entry : mapping.getFields().entrySet()) {
       addColumn(table, entry.getValue());
     }
 
@@ -808,33 +844,35 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   private void addField(SqlMapping mapping, String fieldName, Element ele)
-  throws IOException {
-      String columnName = ele.getAttributeValue("column");
+      throws IOException {
+    String columnName = ele.getAttributeValue("column");
 
-      String jdbcTypeStr = ele.getAttributeValue("jdbc-type");
+    String jdbcTypeStr = ele.getAttributeValue("jdbc-type");
 
-      int length = StringUtils.parseInt(ele.getAttributeValue("length"), -1);
-      int scale = StringUtils.parseInt(ele.getAttributeValue("scale"), -1);
+    int length = StringUtils.parseInt(ele.getAttributeValue("length"), -1);
+    int scale = StringUtils.parseInt(ele.getAttributeValue("scale"), -1);
 
-      JdbcType jdbcType;
-      if (jdbcTypeStr != null) {
-        jdbcType = dbTypeMap.get(jdbcTypeStr);
-        if(jdbcType == null)
-          jdbcType = SqlTypeInterface.stringToJdbcType(jdbcTypeStr);
-      } else if (fieldName == null) { // fieldName == null implies primary key
-        jdbcType = SqlTypeInterface.getJdbcType(keyClass, length, scale);
-        mapping.setPrimaryKey(columnName, jdbcType, length, scale);
-      } else {
-        Schema fieldSchema = schema.getField(fieldName).schema();
-        jdbcType = SqlTypeInterface.getJdbcType(fieldSchema, length, scale);
-        mapping.addField(fieldName, columnName, jdbcType, jdbcTypeStr, length, scale);
-      }
+    JdbcType jdbcType;
+    if (jdbcTypeStr != null) {
+      jdbcType = dbTypeMap.get(jdbcTypeStr);
+      if (jdbcType == null)
+        jdbcType = SqlTypeInterface.stringToJdbcType(jdbcTypeStr);
+    } else if (fieldName == null) { // fieldName == null implies primary key
+      jdbcType = SqlTypeInterface.getJdbcType(keyClass, length, scale);
+      mapping.setPrimaryKey(columnName, jdbcType, length, scale);
+    } else {
+      Schema fieldSchema = schema.getField(fieldName).schema();
+      jdbcType = SqlTypeInterface.getJdbcType(fieldSchema, length, scale);
+      mapping.addField(fieldName, columnName, jdbcType, jdbcTypeStr, length,
+          scale);
+    }
 
-      if (fieldName == null) {
-        mapping.setPrimaryKey(columnName, jdbcType, length, scale);
-      } else {
-        mapping.addField(fieldName, columnName, jdbcType, jdbcTypeStr, length, scale);
-      }
+    if (fieldName == null) {
+      mapping.setPrimaryKey(columnName, jdbcType, length, scale);
+    } else {
+      mapping.addField(fieldName, columnName, jdbcType, jdbcTypeStr, length,
+          scale);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -844,18 +882,22 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
     try {
       SAXBuilder builder = new SAXBuilder();
-      Document doc = builder.build(getClass().getClassLoader()
-          .getResourceAsStream(filename));
+      Document doc =
+          builder.build(getClass().getClassLoader().getResourceAsStream(
+              filename));
 
       List<Element> classes = doc.getRootElement().getChildren("class");
 
-      for(Element classElement: classes) {
-        if(classElement.getAttributeValue("keyClass").equals(keyClass.getCanonicalName())
+      for (Element classElement : classes) {
+        if (classElement.getAttributeValue("keyClass").equals(
+            keyClass.getCanonicalName())
             && classElement.getAttributeValue("name").equals(
                 persistentClass.getCanonicalName())) {
 
-          String tableName = getIdentifier(getSchemaName(
-              classElement.getAttributeValue("table"), persistentClass));
+          String tableName =
+              getSchemaName(classElement.getAttributeValue("table"),
+                  persistentClass);
+          // getIdentifier();
           mapping.setTableName(tableName);
 
           Element primaryKeyEl = classElement.getChild("primarykey");
@@ -863,7 +905,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
           List<Element> fields = classElement.getChildren("field");
 
-          for(Element field:fields) {
+          for (Element field : fields) {
             String fieldName = field.getAttributeValue("name");
             addField(mapping, fieldName, field);
           }
@@ -874,7 +916,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
       primaryColumn = mapping.getPrimaryColumn();
 
-    } catch(Exception ex) {
+    } catch (Exception ex) {
       throw new IOException(ex);
     }
 
