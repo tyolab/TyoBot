@@ -32,8 +32,8 @@ import org.apache.nutch.util.TableUtil;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.mapreduce.GoraMapper;
 
-public class GeneratorMapper
-extends GoraMapper<String, WebPage, SelectorEntry, WebPage> {
+public class GeneratorMapper extends
+    GoraMapper<String, WebPage, SelectorEntry, WebPage> {
 
   private URLFilters filters;
   private URLNormalizers normalizers;
@@ -45,23 +45,27 @@ extends GoraMapper<String, WebPage, SelectorEntry, WebPage> {
   private SelectorEntry entry = new SelectorEntry();
   private int maxDistance;
 
+  private int skippingCount = 0;
+
   @Override
-  public void map(String reversedUrl, WebPage page,
-      Context context) throws IOException, InterruptedException {
+  public void map(String reversedUrl, WebPage page, Context context)
+      throws IOException, InterruptedException {
     String url = TableUtil.unreverseUrl(reversedUrl);
 
     if (Mark.GENERATE_MARK.checkMark(page) != null) {
+      ++skippingCount;
       if (GeneratorJob.LOG.isDebugEnabled()) {
-        GeneratorJob.LOG.debug("Skipping " + url + "; already generated");
+        GeneratorJob.LOG.debug("#" + Integer.toString(skippingCount)
+            + ": Skipping " + url + "; already generated");
       }
       return;
     }
 
-    //filter on distance
+    // filter on distance
     if (maxDistance > -1) {
       Utf8 distanceUtf8 = page.getFromMarkers(DbUpdaterJob.DISTANCE);
       if (distanceUtf8 != null) {
-        int distance=Integer.parseInt(distanceUtf8.toString());
+        int distance = Integer.parseInt(distanceUtf8.toString());
         if (distance > maxDistance) {
           return;
         }
@@ -71,18 +75,22 @@ extends GoraMapper<String, WebPage, SelectorEntry, WebPage> {
     // If filtering is on don't generate URLs that don't pass URLFilters
     try {
       if (normalise) {
-        url = normalizers.normalize(url, URLNormalizers.SCOPE_GENERATE_HOST_COUNT);
+        url =
+            normalizers
+                .normalize(url, URLNormalizers.SCOPE_GENERATE_HOST_COUNT);
       }
       if (filter && filters.filter(url) == null)
         return;
     } catch (URLFilterException e) {
       if (GeneratorJob.LOG.isWarnEnabled()) {
-        GeneratorJob.LOG.warn("Couldn't filter url: " + url + " (" + e.getMessage() + ")");
+        GeneratorJob.LOG.warn("Couldn't filter url: " + url + " ("
+            + e.getMessage() + ")");
         return;
       }
     } catch (MalformedURLException e) {
       if (GeneratorJob.LOG.isWarnEnabled()) {
-        GeneratorJob.LOG.warn("Couldn't filter url: " + url + " (" + e.getMessage() +")");
+        GeneratorJob.LOG.warn("Couldn't filter url: " + url + " ("
+            + e.getMessage() + ")");
         return;
       }
     }
@@ -90,8 +98,8 @@ extends GoraMapper<String, WebPage, SelectorEntry, WebPage> {
     // check fetch schedule
     if (!schedule.shouldFetch(url, page, curTime)) {
       if (GeneratorJob.LOG.isDebugEnabled()) {
-        GeneratorJob.LOG.debug("-shouldFetch rejected '" + url + "', fetchTime=" +
-            page.getFetchTime() + ", curTime=" + curTime);
+        GeneratorJob.LOG.debug("-shouldFetch rejected '" + url
+            + "', fetchTime=" + page.getFetchTime() + ", curTime=" + curTime);
       }
       return;
     }
@@ -99,7 +107,7 @@ extends GoraMapper<String, WebPage, SelectorEntry, WebPage> {
     try {
       score = scoringFilters.generatorSortValue(url, page, score);
     } catch (ScoringFilterException e) {
-      //ignore
+      // ignore
     }
     entry.set(url, score);
     context.write(entry, page);
@@ -114,10 +122,13 @@ extends GoraMapper<String, WebPage, SelectorEntry, WebPage> {
       filters = new URLFilters(conf);
     }
     if (normalise) {
-      normalizers = new URLNormalizers(conf, URLNormalizers.SCOPE_GENERATE_HOST_COUNT);
+      normalizers =
+          new URLNormalizers(conf, URLNormalizers.SCOPE_GENERATE_HOST_COUNT);
     }
-    maxDistance=conf.getInt("generate.max.distance", -1);
-    curTime = conf.getLong(GeneratorJob.GENERATOR_CUR_TIME, System.currentTimeMillis());
+    maxDistance = conf.getInt("generate.max.distance", -1);
+    curTime =
+        conf.getLong(GeneratorJob.GENERATOR_CUR_TIME,
+            System.currentTimeMillis());
     schedule = FetchScheduleFactory.getFetchSchedule(conf);
     scoringFilters = new ScoringFilters(conf);
   }

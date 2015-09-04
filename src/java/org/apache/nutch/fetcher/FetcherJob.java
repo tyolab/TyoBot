@@ -112,19 +112,22 @@ public class FetcherJob extends NutchTool implements Tool {
     protected void map(String key, WebPage page, Context context)
         throws IOException, InterruptedException {
       Utf8 mark = Mark.GENERATE_MARK.checkMark(page);
-      if ((null == mark && !batchId.toString().equals(NULL_BATCH_ID))
+      if ((null == mark && !(batchId.toString().equals(NULL_BATCH_ID) || batchId
+          .toString().equals(Nutch.ALL_BATCH_ID_STR)))
           || (null != mark && !NutchJob.shouldProcess(mark, batchId))) {
-        // if (LOG.isDebugEnabled()) {
-        LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
-            + "; different batch id (" + mark + ")");
-        // }
+        ++instance.skippingCountDiffBatchId;
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
+              + "; different batch id (" + mark + ")");
+        }
         return;
       }
       if (shouldContinue && Mark.FETCH_MARK.checkMark(page) != null) {
-        // if (LOG.isDebugEnabled()) {
-        LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
-            + "; already fetched");
-        // }
+        ++instance.skippingCountFetched;
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
+              + "; already fetched");
+        }
         return;
       }
       context.write(new IntWritable(random.nextInt(65536)), new FetchEntry(
@@ -133,6 +136,12 @@ public class FetcherJob extends NutchTool implements Tool {
   }
 
   public static final Logger LOG = LoggerFactory.getLogger(FetcherJob.class);
+
+  private static FetcherJob instance;
+
+  private int skippingCountDiffBatchId = 0;
+
+  private int skippingCountFetched = 0;
 
   public FetcherJob() {
 
@@ -230,6 +239,12 @@ public class FetcherJob extends NutchTool implements Tool {
 
     run(ToolUtil.toArgMap(Nutch.ARG_BATCH, batchId, Nutch.ARG_THREADS, threads,
         Nutch.ARG_RESUME, shouldResume, Nutch.ARG_NUMTASKS, numTasks));
+
+    LOG.info("FetcherJob: skipped " + String.valueOf(skippingCountDiffBatchId)
+        + " urls with different bactch id");
+    LOG.info("FetcherJob: skipped " + String.valueOf(skippingCountFetched)
+        + " urls that were already fetched");
+
     LOG.info("FetcherJob: done");
     return 0;
   }

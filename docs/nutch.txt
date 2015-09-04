@@ -1,3 +1,6 @@
+==== GENERATOR JOB ====
+SELECT id,status,fetchTime,markers,score FROM webpage LIMIT 10000;
+
 
 ==== FETCHER JOB =====
 
