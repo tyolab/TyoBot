@@ -136,7 +136,10 @@ public class FetcherJob extends NutchTool implements Tool {
             context.getConfiguration(), key, page));
       } catch (Exception ex) {
         ex.printStackTrace();
-        throw ex;
+        if (ex instanceof IOException)
+          throw (IOException) ex;
+        else if (ex instanceof InterruptedException)
+          throw (InterruptedException) ex;
       }
     }
   }

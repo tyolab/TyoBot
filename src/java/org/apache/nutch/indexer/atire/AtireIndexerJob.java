@@ -46,7 +46,7 @@ public class AtireIndexerJob extends IndexerJob {
     String batchId = (String) args.get(Nutch.ARG_BATCH);
     String clusterName = (String) args.get(AtireConstants.CLUSTER);
 
-    getConf().set(AtireConstants.CLUSTER, clusterName);
+    // getConf().set(AtireConstants.CLUSTER, clusterName);
 
     currentJob =
         createIndexJob(getConf(), "atire-index [" + clusterName + "]", batchId);

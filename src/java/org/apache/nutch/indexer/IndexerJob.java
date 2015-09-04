@@ -47,7 +47,8 @@ public abstract class IndexerJob extends NutchTool implements Tool {
 
   public static final Logger LOG = LoggerFactory.getLogger(IndexerJob.class);
 
-  private static final Collection<WebPage.Field> FIELDS = new HashSet<WebPage.Field>();
+  private static final Collection<WebPage.Field> FIELDS =
+      new HashSet<WebPage.Field>();
 
   private static final Utf8 REINDEX = new Utf8("-reindex");
 
@@ -57,18 +58,19 @@ public abstract class IndexerJob extends NutchTool implements Tool {
     FIELDS.add(WebPage.Field.SCORE);
     FIELDS.add(WebPage.Field.MARKERS);
   }
-  
-  public static class IndexerMapper
-      extends GoraMapper<String, WebPage, String, NutchDocument> {
+
+  public static class IndexerMapper extends
+      GoraMapper<String, WebPage, String, NutchDocument> {
     public IndexUtil indexUtil;
     public DataStore<String, WebPage> store;
-    
+
     protected Utf8 batchId;
 
     @Override
     public void setup(Context context) throws IOException {
       Configuration conf = context.getConfiguration();
-      batchId = new Utf8(conf.get(GeneratorJob.BATCH_ID, Nutch.ALL_BATCH_ID_STR));
+      batchId =
+          new Utf8(conf.get(GeneratorJob.BATCH_ID, Nutch.ALL_BATCH_ID_STR));
       indexUtil = new IndexUtil(conf);
       try {
         store = StorageUtils.createWebStore(conf, String.class, WebPage.class);
@@ -76,14 +78,15 @@ public abstract class IndexerJob extends NutchTool implements Tool {
         throw new IOException(e);
       }
     }
-    
-    protected void cleanup(Context context) throws IOException ,InterruptedException {
+
+    protected void cleanup(Context context) throws IOException,
+        InterruptedException {
       store.close();
     };
 
     @Override
     public void map(String key, WebPage page, Context context)
-    throws IOException, InterruptedException {
+        throws IOException, InterruptedException {
       ParseStatus pstatus = page.getParseStatus();
       if (pstatus == null || !ParseStatusUtils.isSuccess(pstatus)
           || pstatus.getMinorCode() == ParseStatusCodes.SUCCESS_REDIRECT) {
@@ -92,14 +95,17 @@ public abstract class IndexerJob extends NutchTool implements Tool {
 
       Utf8 mark = Mark.UPDATEDB_MARK.checkMark(page);
       if (!batchId.equals(REINDEX)) {
-        if (!NutchJob.shouldProcess(mark, batchId)) {
+        if ((null == mark && !(batchId.toString()
+            .equals(Nutch.ALL_BATCH_ID_STR)))
+            || (null != mark && !NutchJob.shouldProcess(mark, batchId))) {
           if (LOG.isDebugEnabled()) {
-            LOG.debug("Skipping " + TableUtil.unreverseUrl(key) + "; different batch id (" + mark + ")");
+            LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
+                + "; different batch id (" + mark + ")");
           }
           return;
         }
       }
-      
+
       NutchDocument doc = indexUtil.index(key, page);
       if (doc == null) {
         return;
@@ -112,7 +118,6 @@ public abstract class IndexerJob extends NutchTool implements Tool {
     }
   }
 
-
   private static Collection<WebPage.Field> getFields(Job job) {
     Configuration conf = job.getConfiguration();
     Collection<WebPage.Field> columns = new HashSet<WebPage.Field>(FIELDS);
@@ -123,8 +128,8 @@ public abstract class IndexerJob extends NutchTool implements Tool {
     return columns;
   }
 
-  protected Job createIndexJob(Configuration conf, String jobName, String batchId)
-  throws IOException, ClassNotFoundException {
+  protected Job createIndexJob(Configuration conf, String jobName,
+      String batchId) throws IOException, ClassNotFoundException {
     conf.set(GeneratorJob.BATCH_ID, batchId);
     Job job = new NutchJob(conf, jobName);
     // TODO: Figure out why this needs to be here
