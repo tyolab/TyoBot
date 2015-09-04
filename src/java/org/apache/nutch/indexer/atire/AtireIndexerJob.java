@@ -58,9 +58,8 @@ public class AtireIndexerJob extends IndexerJob {
     return results;
   }
 
-  public void indexAtire(String clusterName, String batchId) throws Exception {
-    run(ToolUtil.toArgMap(AtireConstants.CLUSTER, clusterName, Nutch.ARG_BATCH,
-        batchId));
+  public void indexAtire(String batchId) throws Exception {
+    run(ToolUtil.toArgMap(Nutch.ARG_BATCH, batchId));
   }
 
   public int run(String[] args) throws Exception {
@@ -73,7 +72,7 @@ public class AtireIndexerJob extends IndexerJob {
           .println("Usage: (<batchId> | -all | -reindex) [-crawlId <id>]");
       return -1;
     }
-    indexAtire(args[0], args[1]);
+    indexAtire(args[0]);
     return 0;
   }
 

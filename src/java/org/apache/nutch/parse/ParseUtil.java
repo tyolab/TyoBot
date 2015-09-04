@@ -61,7 +61,7 @@ public class ParseUtil extends Configured {
   public static final Logger LOG = LoggerFactory.getLogger(ParseUtil.class);
 
   private static final int DEFAULT_MAX_PARSE_TIME = 30;
-  
+
   private Configuration conf;
   private Signature sig;
   private URLFilters filters;
@@ -72,7 +72,7 @@ public class ParseUtil extends Configured {
   /** Parser timeout set to 30 sec by default. Set -1 to deactivate **/
   private int maxParseTime;
   private ExecutorService executorService;
-  
+
   /**
    *
    * @param conf
@@ -91,15 +91,17 @@ public class ParseUtil extends Configured {
   public void setConf(Configuration conf) {
     this.conf = conf;
     parserFactory = new ParserFactory(conf);
-    maxParseTime=conf.getInt("parser.timeout", DEFAULT_MAX_PARSE_TIME);
+    maxParseTime = conf.getInt("parser.timeout", DEFAULT_MAX_PARSE_TIME);
     sig = SignatureFactory.getSignature(conf);
     filters = new URLFilters(conf);
     normalizers = new URLNormalizers(conf, URLNormalizers.SCOPE_OUTLINK);
     int maxOutlinksPerPage = conf.getInt("db.max.outlinks.per.page", 100);
-    maxOutlinks = (maxOutlinksPerPage < 0) ? Integer.MAX_VALUE : maxOutlinksPerPage;
+    maxOutlinks =
+        (maxOutlinksPerPage < 0) ? Integer.MAX_VALUE : maxOutlinksPerPage;
     ignoreExternalLinks = conf.getBoolean("db.ignore.external.links", false);
-    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
-      .setNameFormat("parse-%d").setDaemon(true).build());
+    executorService =
+        Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+            .setNameFormat("parse-%d").setDaemon(true).build());
   }
 
   /**
@@ -108,10 +110,10 @@ public class ParseUtil extends Configured {
    * returned. If the parse is unsuccessful, a message is logged to the
    * <code>WARNING</code> level, and an empty parse is returned.
    *
-   * @throws ParserNotFound If there is no suitable parser found. 
+   * @throws ParserNotFound If there is no suitable parser found.
    * @throws ParseException If there is an error parsing.
    */
-  public Parse parse(String url, WebPage page) throws ParserNotFound, 
+  public Parse parse(String url, WebPage page) throws ParserNotFound,
       ParseException {
     Parser[] parsers = null;
 
@@ -119,28 +121,29 @@ public class ParseUtil extends Configured {
 
     parsers = this.parserFactory.getParsers(contentType, url);
 
-    for (int i=0; i<parsers.length; i++) {
+    for (int i = 0; i < parsers.length; i++) {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Parsing [" + url + "] with [" + parsers[i] + "]");
       }
       Parse parse = null;
-      
-      if (maxParseTime!=-1)
-    	  parse = runParser(parsers[i], url, page);
-      else 
-    	  parse = parsers[i].getParse(url, page);
-      
-      if (parse!=null && ParseStatusUtils.isSuccess(parse.getParseStatus())) {
+
+      if (maxParseTime != -1)
+        parse = runParser(parsers[i], url, page);
+      else
+        parse = parsers[i].getParse(url, page);
+
+      if (parse != null && ParseStatusUtils.isSuccess(parse.getParseStatus())) {
         return parse;
       }
     }
 
-    LOG.warn("Unable to successfully parse content " + url +
-        " of type " + contentType);
-    return ParseStatusUtils.getEmptyParse(new ParseException("Unable to successfully parse content"), null);
+    LOG.warn("Unable to successfully parse content " + url + " of type "
+        + contentType);
+    return ParseStatusUtils.getEmptyParse(new ParseException(
+        "Unable to successfully parse content"), null);
   }
-  
-  private Parse runParser(Parser p, String url, WebPage page) {    
+
+  private Parse runParser(Parser p, String url, WebPage page) {
     ParseCallable pc = new ParseCallable(p, page, url);
     Future<Parse> task = executorService.submit(pc);
     Parse res = null;
@@ -156,8 +159,9 @@ public class ParseUtil extends Configured {
   }
 
   /**
-   * Parses given web page and stores parsed content within page. Puts
-   * a meta-redirect to outlinks.
+   * Parses given web page and stores parsed content within page. Puts a
+   * meta-redirect to outlinks.
+   * 
    * @param key
    * @param page
    */
@@ -165,9 +169,10 @@ public class ParseUtil extends Configured {
     String url = TableUtil.unreverseUrl(key);
     byte status = (byte) page.getStatus();
     if (status != CrawlStatus.STATUS_FETCHED) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Skipping " + url + " as status is: " + CrawlStatus.getName(status));
-      }
+      // if (LOG.isDebugEnabled()) {
+      LOG.debug("Skipping " + url + " as status is: "
+          + CrawlStatus.getName(status));
+      // }
       return;
     }
 
@@ -218,8 +223,9 @@ public class ParseUtil extends Configured {
         page.putToOutlinks(new Utf8(newUrl), new Utf8());
         page.putToMetadata(FetcherJob.REDIRECT_DISCOVERED, TableUtil.YES_VAL);
         if (newUrl == null || newUrl.equals(url)) {
-          String reprUrl = URLUtil.chooseRepr(url, newUrl,
-              refreshTime < FetcherJob.PERM_REFRESH_TIME);
+          String reprUrl =
+              URLUtil.chooseRepr(url, newUrl,
+                  refreshTime < FetcherJob.PERM_REFRESH_TIME);
           if (reprUrl == null) {
             LOG.warn("reprUrl==null for " + url);
             return;

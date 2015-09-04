@@ -5,3 +5,7 @@ SELECT id,status,fetchTime,markers,score FROM webpage LIMIT 10000;
 ==== FETCHER JOB =====
 
 SELECT id,markers,modifiedTime,headers,reprUrl,fetchTime FROM webpage LIMIT 10000;
+
+
+==== INDEXERJOB =====
+SELECT id,signature,title,parseStatus,fetchTime,inlinks,metadata,score,text,markers FROM webpage LIMIT 10000;

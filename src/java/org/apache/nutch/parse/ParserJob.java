@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.avro.util.Utf8;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -112,7 +113,8 @@ public class ParserJob extends NutchTool implements Tool {
               + "; different batch id (" + mark + ")");
           return;
         }
-        if (shouldResume && Mark.PARSE_MARK.checkMark(page) != null) {
+        Utf8 parseMark = Mark.PARSE_MARK.checkMark(page);
+        if (shouldResume && parseMark != null) {
           if (force) {
             LOG.info("Forced parsing " + unreverseKey + "; already parsed");
           } else {

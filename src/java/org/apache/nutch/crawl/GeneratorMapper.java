@@ -52,11 +52,12 @@ public class GeneratorMapper extends
       throws IOException, InterruptedException {
     String url = TableUtil.unreverseUrl(reversedUrl);
 
-    if (Mark.GENERATE_MARK.checkMark(page) != null) {
+    Utf8 mark = Mark.GENERATE_MARK.checkMark(page);
+    if (mark != null) {
       ++skippingCount;
       if (GeneratorJob.LOG.isDebugEnabled()) {
         GeneratorJob.LOG.debug("#" + Integer.toString(skippingCount)
-            + ": Skipping " + url + "; already generated");
+            + ": Skipping " + url + "; already generated (" + mark + ")");
       }
       return;
     }

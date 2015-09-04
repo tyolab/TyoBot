@@ -111,27 +111,33 @@ public class FetcherJob extends NutchTool implements Tool {
     @Override
     protected void map(String key, WebPage page, Context context)
         throws IOException, InterruptedException {
-      Utf8 mark = Mark.GENERATE_MARK.checkMark(page);
-      if ((null == mark && !(batchId.toString().equals(NULL_BATCH_ID) || batchId
-          .toString().equals(Nutch.ALL_BATCH_ID_STR)))
-          || (null != mark && !NutchJob.shouldProcess(mark, batchId))) {
-        ++instance.skippingCountDiffBatchId;
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
-              + "; different batch id (" + mark + ")");
+      try {
+        Utf8 mark = Mark.GENERATE_MARK.checkMark(page);
+        if ((null == mark && !(batchId.toString().equals(NULL_BATCH_ID) || batchId
+            .toString().equals(Nutch.ALL_BATCH_ID_STR)))
+            || (null != mark && !NutchJob.shouldProcess(mark, batchId))) {
+          ++instance.skippingCountDiffBatchId;
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
+                + "; different batch id (" + mark + ")");
+          }
+          return;
         }
-        return;
-      }
-      if (shouldContinue && Mark.FETCH_MARK.checkMark(page) != null) {
-        ++instance.skippingCountFetched;
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
-              + "; already fetched");
+        Utf8 fetchMark = Mark.FETCH_MARK.checkMark(page);
+        if (shouldContinue && fetchMark != null) {
+          ++instance.skippingCountFetched;
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Skipping " + TableUtil.unreverseUrl(key)
+                + "; already fetched");
+          }
+          return;
         }
-        return;
+        context.write(new IntWritable(random.nextInt(65536)), new FetchEntry(
+            context.getConfiguration(), key, page));
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        throw ex;
       }
-      context.write(new IntWritable(random.nextInt(65536)), new FetchEntry(
-          context.getConfiguration(), key, page));
     }
   }
 
@@ -285,6 +291,8 @@ public class FetcherJob extends NutchTool implements Tool {
 
   @Override
   public int run(String[] args) throws Exception {
+    instance = this;
+
     int threads = -1;
     boolean shouldResume = false;
     String batchId;
