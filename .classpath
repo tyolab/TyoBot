@@ -87,7 +87,7 @@
 	<classpathentry kind="lib" path="runtime/local/lib/cxf-rt-transports-http-2.5.2.jar"/>
 	<classpathentry kind="lib" path="runtime/local/lib/elasticsearch-0.19.4.jar"/>
 	<classpathentry kind="lib" path="runtime/local/lib/geronimo-javamail_1.4_spec-1.7.1.jar"/>
-	<classpathentry kind="lib" path="runtime/local/lib/gora-core-0.2.1.jar"/>
+	<classpathentry kind="lib" path="runtime/local/lib/gora-core-0.2.1.jar" sourcepath="/home/monfee/Downloads/apache-gora-0.2/src/main/java"/>
 	<classpathentry kind="lib" path="runtime/local/lib/gora-sql-0.1.1-incubating.jar"/>
 	<classpathentry kind="lib" path="runtime/local/lib/guava-11.0.2.jar"/>
 	<classpathentry kind="lib" path="runtime/local/lib/hadoop-core-1.0.3.jar" sourcepath="/home/monfee/Downloads/hadoop-1.0.3/src"/>

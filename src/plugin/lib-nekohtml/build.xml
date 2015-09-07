@@ -60,6 +60,7 @@
    ! since there is nothing to compile here.
    ! -->
  <!-- TARGETS --> 
+ <target name='compile' depends='init,version'/>
  <target name='all' depends='zip,tgz'/>
 
  <target name='init'>
@@ -104,7 +105,7 @@
 	</sequential>
 </macrodef>
 	
-<target name='compile' depends='init,version,resolve-default' 
+<target name='compile-nekohtml' depends='init,version,resolve-default' 
 		description="compiles many times to ensure compatibility with the different Xerces versions"
 		unless="compile.skip">
 	<mkdir dir="${build.classes.dir}"/>

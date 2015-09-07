@@ -66,7 +66,9 @@ public class DOMContentUtils {
     Collection<String> forceTags = new ArrayList<String>(1);
 
     linkParams.clear();
-    linkParams.put("a", new LinkParams("a", "href", 1));
+    // a link doesn't have to include an anchor
+    linkParams.put("a", new LinkParams("a", "href", 0)); // originally set to
+                                                         // one
     linkParams.put("area", new LinkParams("area", "href", 0));
     if (conf.getBoolean("parser.html.form.use_action", true)) {
       linkParams.put("form", new LinkParams("form", "action", 1));

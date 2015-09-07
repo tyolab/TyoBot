@@ -95,7 +95,14 @@ public class ParseUtil extends Configured {
     sig = SignatureFactory.getSignature(conf);
     filters = new URLFilters(conf);
     normalizers = new URLNormalizers(conf, URLNormalizers.SCOPE_OUTLINK);
-    int maxOutlinksPerPage = conf.getInt("db.max.outlinks.per.page", 100);
+    int maxOutlinksPerPage = conf.getInt("db.max.outlinks.per.page", 1000); // some
+                                                                            // list
+                                                                            // pages
+                                                                            // could
+                                                                            // easily
+                                                                            // exceed
+                                                                            // 100
+                                                                            // links
     maxOutlinks =
         (maxOutlinksPerPage < 0) ? Integer.MAX_VALUE : maxOutlinksPerPage;
     ignoreExternalLinks = conf.getBoolean("db.ignore.external.links", false);
@@ -242,7 +249,8 @@ public class ParseUtil extends Configured {
         }
         page.setSignature(ByteBuffer.wrap(signature));
         if (page.getOutlinks() != null) {
-          page.getOutlinks().clear();
+          // page.getOutlinks().clear();
+          page.clearOutlinks();
         }
         final Outlink[] outlinks = parse.getOutlinks();
         final int count = 0;
@@ -256,19 +264,30 @@ public class ParseUtil extends Configured {
         } else {
           fromHost = null;
         }
-        for (int i = 0; count < maxOutlinks && i < outlinks.length; i++) {
+        /*
+         * don't need to limit the outlinks number
+         */
+        for (int i = 0; /* count < maxOutlinks && */i < outlinks.length; i++) {
           String toUrl = outlinks[i].getToUrl();
+          String normailizedUrl = toUrl;
           try {
-            toUrl = normalizers.normalize(toUrl, URLNormalizers.SCOPE_OUTLINK);
-            toUrl = filters.filter(toUrl);
+            normailizedUrl =
+                normalizers.normalize(toUrl, URLNormalizers.SCOPE_OUTLINK);
+            toUrl = filters.filter(normailizedUrl);
           } catch (MalformedURLException e2) {
             continue;
           } catch (URLFilterException e) {
             continue;
           }
           if (toUrl == null) {
+            if (normailizedUrl != null)
+              LOG.info("skipping " + normailizedUrl);
             continue;
+          } else {
+            // LOG.info("found link: " + toUrl);
+            System.out.println("found link: " + toUrl);
           }
+
           Utf8 utf8ToUrl = new Utf8(toUrl);
           if (page.getFromOutlinks(utf8ToUrl) != null) {
             // skip duplicate outlinks
@@ -287,6 +306,9 @@ public class ParseUtil extends Configured {
           }
 
           page.putToOutlinks(utf8ToUrl, new Utf8(outlinks[i].getAnchor()));
+
+          if (maxOutlinks > 0 && count > maxOutlinks)
+            break;
         }
         Utf8 fetchMark = Mark.FETCH_MARK.checkMark(page);
         if (fetchMark != null) {
