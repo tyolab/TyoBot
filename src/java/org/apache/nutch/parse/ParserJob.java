@@ -52,17 +52,19 @@ public class ParserJob extends NutchTool implements Tool {
 
   public static final Logger LOG = LoggerFactory.getLogger(ParserJob.class);
 
-  private static final String RESUME_KEY = "parse.job.resume";
-  private static final String FORCE_KEY = "parse.job.force";
+  protected static final String RESUME_KEY = "parse.job.resume";
+  protected static final String FORCE_KEY = "parse.job.force";
 
   public static final String SKIP_TRUNCATED = "parser.skip.truncated";
 
-  private static final Utf8 REPARSE = new Utf8("-reparse");
+  protected static final Utf8 REPARSE = new Utf8("-reparse");
 
   protected static final Collection<WebPage.Field> FIELDS =
       new HashSet<WebPage.Field>();
 
   private Configuration conf;
+
+  protected static Class mapperClass = ParserMapper.class;
 
   static {
     FIELDS.add(WebPage.Field.STATUS);
@@ -235,7 +237,7 @@ public class ParserJob extends NutchTool implements Tool {
     }
     if (shouldResume != null) {
       getConf().setBoolean(RESUME_KEY, shouldResume);
-    }
+    }ParserMapper.class
     if (force != null) {
       getConf().setBoolean(FORCE_KEY, force);
     }
@@ -251,7 +253,7 @@ public class ParserJob extends NutchTool implements Tool {
 
     Collection<WebPage.Field> fields = getFields(currentJob);
     StorageUtils.initMapperJob(currentJob, fields, String.class, WebPage.class,
-        ParserMapper.class);
+        mapperClass);
     StorageUtils.initReducerJob(currentJob, IdentityPageReducer.class);
     currentJob.setNumReduceTasks(0);
 
