@@ -40,7 +40,7 @@ import org.apache.gora.persistency.ListGenericArray;
 public class WebPage extends PersistentBase {
   public static final Schema _SCHEMA =
       Schema
-          .parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.nutch.storage\",\"fields\":[{\"name\":\"baseUrl\",\"type\":\"string\"},{\"name\":\"status\",\"type\":\"int\"},{\"name\":\"fetchTime\",\"type\":\"long\"},{\"name\":\"prevFetchTime\",\"type\":\"long\"},{\"name\":\"fetchInterval\",\"type\":\"int\"},{\"name\":\"retriesSinceFetch\",\"type\":\"int\"},{\"name\":\"modifiedTime\",\"type\":\"long\"},{\"name\":\"protocolStatus\",\"type\":{\"type\":\"record\",\"name\":\"ProtocolStatus\",\"fields\":[{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"args\",\"type\":{\"type\":\"array\",\"items\":\"string\"}},{\"name\":\"lastModified\",\"type\":\"long\"}]}},{\"name\":\"content\",\"type\":\"bytes\"},{\"name\":\"contentType\",\"type\":\"string\"},{\"name\":\"prevSignature\",\"type\":\"bytes\"},{\"name\":\"signature\",\"type\":\"bytes\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"text\",\"type\":\"string\"},{\"name\":\"parseStatus\",\"type\":{\"type\":\"record\",\"name\":\"ParseStatus\",\"fields\":[{\"name\":\"majorCode\",\"type\":\"int\"},{\"name\":\"minorCode\",\"type\":\"int\"},{\"name\":\"args\",\"type\":{\"type\":\"array\",\"items\":\"string\"}}]}},{\"name\":\"score\",\"type\":\"float\"},{\"name\":\"reprUrl\",\"type\":\"string\"},{\"name\":\"headers\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"inlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"markers\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"metadata\",\"type\":{\"type\":\"map\",\"values\":\"bytes\"}}]}");
+          .parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.nutch.storage\",\"fields\":[{\"name\":\"baseUrl\",\"type\":\"string\"},{\"name\":\"status\",\"type\":\"int\"},{\"name\":\"fetchTime\",\"type\":\"long\"},{\"name\":\"prevFetchTime\",\"type\":\"long\"},{\"name\":\"fetchInterval\",\"type\":\"int\"},{\"name\":\"retriesSinceFetch\",\"type\":\"int\"},{\"name\":\"modifiedTime\",\"type\":\"long\"},{\"name\":\"protocolStatus\",\"type\":{\"type\":\"record\",\"name\":\"ProtocolStatus\",\"fields\":[{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"args\",\"type\":{\"type\":\"array\",\"items\":\"string\"}},{\"name\":\"lastModified\",\"type\":\"long\"}]}},{\"name\":\"content\",\"type\":\"bytes\"},{\"name\":\"contentType\",\"type\":\"string\"},{\"name\":\"prevSignature\",\"type\":\"bytes\"},{\"name\":\"signature\",\"type\":\"bytes\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"text\",\"type\":\"string\"},{\"name\":\"parseStatus\",\"type\":{\"type\":\"record\",\"name\":\"ParseStatus\",\"fields\":[{\"name\":\"majorCode\",\"type\":\"int\"},{\"name\":\"minorCode\",\"type\":\"int\"},{\"name\":\"args\",\"type\":{\"type\":\"array\",\"items\":\"string\"}}]}},{\"name\":\"score\",\"type\":\"float\"},{\"name\":\"reprUrl\",\"type\":\"string\"},{\"name\":\"headers\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"inlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"markers\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"metadata\",\"type\":{\"type\":\"map\",\"values\":\"bytes\"}, {\"name\":\"thumbUrl\",\"type\":\"string\"}}]}");
 
   public static enum Field {
     BASE_URL(0, "baseUrl"), STATUS(1, "status"), FETCH_TIME(2, "fetchTime"), PREV_FETCH_TIME(
@@ -51,7 +51,7 @@ public class WebPage extends PersistentBase {
         "signature"), TITLE(12, "title"), TEXT(13, "text"), PARSE_STATUS(14,
         "parseStatus"), SCORE(15, "score"), REPR_URL(16, "reprUrl"), HEADERS(
         17, "headers"), OUTLINKS(18, "outlinks"), INLINKS(19, "inlinks"), MARKERS(
-        20, "markers"), METADATA(21, "metadata"), ;
+        20, "markers"), METADATA(21, "metadata"), THUMB_URL(22, "thumbUrl"), ;
     private int index;
     private String name;
 
@@ -77,7 +77,8 @@ public class WebPage extends PersistentBase {
       "fetchTime", "prevFetchTime", "fetchInterval", "retriesSinceFetch",
       "modifiedTime", "protocolStatus", "content", "contentType",
       "prevSignature", "signature", "title", "text", "parseStatus", "score",
-      "reprUrl", "headers", "outlinks", "inlinks", "markers", "metadata", };
+      "reprUrl", "headers", "outlinks", "inlinks", "markers", "metadata",
+      "thumbUrl" };
   static {
     PersistentBase.registerFields(WebPage.class, _ALL_FIELDS);
   }
@@ -103,6 +104,7 @@ public class WebPage extends PersistentBase {
   private Map<Utf8, Utf8> inlinks;
   private Map<Utf8, Utf8> markers;
   private Map<Utf8, ByteBuffer> metadata;
+  private Utf8 thumbUrl;
 
   public WebPage() {
     this(new StateManagerImpl());
@@ -171,6 +173,8 @@ public class WebPage extends PersistentBase {
       return markers;
     case 21:
       return metadata;
+    case 22:
+      return thumbUrl;
     default:
       throw new AvroRuntimeException("Bad index");
     }
@@ -247,6 +251,9 @@ public class WebPage extends PersistentBase {
       break;
     case 21:
       metadata = (Map<Utf8, ByteBuffer>) _value;
+      break;
+    case 22:
+      thumbUrl = (Utf8) _value;
       break;
     default:
       throw new AvroRuntimeException("Bad index");
@@ -516,5 +523,13 @@ public class WebPage extends PersistentBase {
   public void clearOutlinks() {
     outlinks.clear();
     outlinks = new StatefulHashMap<Utf8, Utf8>();
+  }
+
+  public void setThumbUrl(Utf8 value) {
+    put(22, value);
+  }
+
+  public Utf8 getThumbUrl() {
+    return (Utf8) get(22);
   }
 }

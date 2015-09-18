@@ -59,7 +59,7 @@ public class ParserJob extends NutchTool implements Tool {
 
   private static final Utf8 REPARSE = new Utf8("-reparse");
 
-  private static final Collection<WebPage.Field> FIELDS =
+  protected static final Collection<WebPage.Field> FIELDS =
       new HashSet<WebPage.Field>();
 
   private Configuration conf;

@@ -43,6 +43,14 @@
 <extension-point
       id="org.apache.nutch.net.URLFilter"
       name="Nutch URL Filter"/>
+      
+<extension-point
+      id="org.apache.nutch.net.URLFilterIndex"
+      name="Nutch URL Filter for Indexer"/>      
+      
+<extension-point
+      id="org.apache.nutch.net.URLFilterThumbnail"
+      name="Nutch URL Filter for Thumbnail Parser and Fetcher"/>      
 
 <extension-point
       id="org.apache.nutch.net.URLNormalizer"
