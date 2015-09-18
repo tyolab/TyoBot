@@ -3,6 +3,10 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="runtime/local/conf"/>
 	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="src" path="src/plugin/urlfilter-index/src/test"/>
+	<classpathentry kind="src" path="src/plugin/urlfilter-thumbnail/src/test"/>
+	<classpathentry kind="src" path="src/plugin/urlfilter-thumbnail/src/java"/>
+	<classpathentry kind="src" path="src/plugin/urlfilter-index/src/java"/>
 	<classpathentry kind="src" output="build/test/classes" path="src/test"/>
 	<classpathentry kind="src" path="src/plugin/creativecommons/src/java"/>
 	<classpathentry kind="src" path="src/plugin/creativecommons/src/test"/>
@@ -212,5 +216,7 @@
 	<classpathentry kind="lib" path="lib/plugins/urlnormalizer-regex.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/xercesImpl-2.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/xmlbeans-2.3.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/atire_jni"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/AtireJ"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

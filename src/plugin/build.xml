@@ -29,6 +29,7 @@
      <ant dir="creativecommons" target="deploy"/>
      <ant dir="index-anchor" target="deploy"/>
      <ant dir="index-basic" target="deploy"/>
+     <ant dir="index-metadata" target="deploy"/>
      <ant dir="index-more" target="deploy"/>
      <ant dir="language-identifier" target="deploy"/>
      <ant dir="lib-http" target="deploy"/>
@@ -51,9 +52,11 @@
      <ant dir="tld" target="deploy"/>
      <ant dir="urlfilter-automaton" target="deploy"/>
      <ant dir="urlfilter-domain" target="deploy" />
+     <ant dir="urlfilter-index" target="deploy" />
      <ant dir="urlfilter-prefix" target="deploy"/>
      <ant dir="urlfilter-regex" target="deploy"/>
      <ant dir="urlfilter-suffix" target="deploy"/>
+     <ant dir="urlfilter-thumbnail" target="deploy" />
      <ant dir="urlfilter-validator" target="deploy"/>
      <ant dir="urlnormalizer-basic" target="deploy"/>
      <ant dir="urlnormalizer-pass" target="deploy"/>

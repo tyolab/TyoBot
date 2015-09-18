@@ -36,36 +36,38 @@ import org.apache.nutch.util.Bytes;
 import org.apache.nutch.util.TableUtil;
 import org.apache.solr.common.util.DateUtil;
 
-/** Adds basic searchable fields to a document. The fields are:
- * host - add host as un-stored, indexed and tokenized
- * site - add site as un-stored, indexed and un-tokenized
- * url - url is both stored and indexed, so it's both searchable and returned. 
- * This is also a required field.
- * orig - also store original url as both stored and indexed
- * content - content is indexed, so that it's searchable, but not stored in index
- * title - title is stored and indexed
- * cache - add cached content/summary display policy, if available
- * tstamp - add timestamp when fetched, for deduplication
+/**
+ * Adds basic searchable fields to a document. The fields are: host - add host
+ * as un-stored, indexed and tokenized site - add site as un-stored, indexed and
+ * un-tokenized url - url is both stored and indexed, so it's both searchable
+ * and returned. This is also a required field. orig - also store original url
+ * as both stored and indexed content - content is indexed, so that it's
+ * searchable, but not stored in index title - title is stored and indexed cache
+ * - add cached content/summary display policy, if available tstamp - add
+ * timestamp when fetched, for deduplication
  */
 public class BasicIndexingFilter implements IndexingFilter {
-  public static final Logger LOG = LoggerFactory.getLogger(BasicIndexingFilter.class);
+  public static final Logger LOG = LoggerFactory
+      .getLogger(BasicIndexingFilter.class);
 
   private int MAX_TITLE_LENGTH;
   private Configuration conf;
 
-  private static final Collection<WebPage.Field> FIELDS = new HashSet<WebPage.Field>();
+  private static final Collection<WebPage.Field> FIELDS =
+      new HashSet<WebPage.Field>();
 
   static {
+    FIELDS.add(WebPage.Field.METADATA);
     FIELDS.add(WebPage.Field.TITLE);
     FIELDS.add(WebPage.Field.TEXT);
     FIELDS.add(WebPage.Field.FETCH_TIME);
   }
 
   /**
-   * The {@link BasicIndexingFilter} filter object which supports boolean 
-   * configurable value for length of characters permitted within the 
-   * title @see {@code indexer.max.title.length} in nutch-default.xml
-   *  
+   * The {@link BasicIndexingFilter} filter object which supports boolean
+   * configurable value for length of characters permitted within the title @see
+   * {@code indexer.max.title.length} in nutch-default.xml
+   * 
    * @param doc The {@link NutchDocument} object
    * @param url URL to be filtered for anchor text
    * @param page {@link WebPage} object relative to the URL
@@ -120,16 +122,18 @@ public class BasicIndexingFilter implements IndexingFilter {
       doc.add("title", title);
     }
     // add cached content/summary display policy, if available
-    ByteBuffer cachingRaw = page
-        .getFromMetadata(Nutch.CACHING_FORBIDDEN_KEY_UTF8);
-    String caching = (cachingRaw == null ? null : Bytes.toString(cachingRaw
-        .array()));
+    ByteBuffer cachingRaw =
+        page.getFromMetadata(Nutch.CACHING_FORBIDDEN_KEY_UTF8);
+    String caching =
+        (cachingRaw == null ? null : Bytes.toString(cachingRaw.array()));
     if (caching != null && !caching.equals(Nutch.CACHING_FORBIDDEN_NONE)) {
       doc.add("cache", caching);
     }
 
     // add timestamp when fetched, for deduplication
-    String tstamp = DateUtil.getThreadLocalDateFormat().format(new Date(page.getFetchTime()));
+    String tstamp =
+        DateUtil.getThreadLocalDateFormat().format(
+            new Date(page.getFetchTime()));
     doc.add("tstamp", tstamp);
 
     return doc;
@@ -144,7 +148,8 @@ public class BasicIndexingFilter implements IndexingFilter {
   public void setConf(Configuration conf) {
     this.conf = conf;
     this.MAX_TITLE_LENGTH = conf.getInt("indexer.max.title.length", 100);
-    LOG.info("Maximum title length for indexing set to: " + this.MAX_TITLE_LENGTH);
+    LOG.info("Maximum title length for indexing set to: "
+        + this.MAX_TITLE_LENGTH);
   }
 
   /**
@@ -155,10 +160,9 @@ public class BasicIndexingFilter implements IndexingFilter {
   }
 
   /**
-   * Gets all the fields for a given {@link WebPage}
-   * Many datastores need to setup the mapreduce job by specifying the fields
-   * needed. All extensions that work on WebPage are able to specify what fields
-   * they need.
+   * Gets all the fields for a given {@link WebPage} Many datastores need to
+   * setup the mapreduce job by specifying the fields needed. All extensions
+   * that work on WebPage are able to specify what fields they need.
    */
   @Override
   public Collection<WebPage.Field> getFields() {

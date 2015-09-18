@@ -420,9 +420,9 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       /*
        * the query limit is not defined in the nutch scope
        */
-      // if (query.getLimit() > 0) {
-      // select.setLimit(query.getLimit());
-      // }
+      if (query.getLimit() > 0) {
+        select.setLimit(query.getLimit());
+      }
 
       statement = getConnection().prepareStatement(select.toString());
 

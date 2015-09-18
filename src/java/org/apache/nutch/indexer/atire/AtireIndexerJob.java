@@ -77,6 +77,12 @@ public class AtireIndexerJob extends IndexerJob {
   }
 
   public static void main(String[] args) throws Exception {
+    try {
+      System.loadLibrary("atire_jni");
+    } catch (Exception ex) {
+      System.exit(-1);
+    }
+
     int res =
         ToolRunner
             .run(NutchConfiguration.create(), new AtireIndexerJob(), args);

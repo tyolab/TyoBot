@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.nutch.urlfilter.regex;
+package org.apache.nutch.urlfilter.index;
 
 // JDK imports
 import java.io.IOException;
@@ -26,33 +26,34 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.urlfilter.api.RegexRule;
 import org.apache.nutch.urlfilter.api.RegexURLFilterBase;
-import org.apache.nutch.urlfilter.regex.RegexURLFilter;
 import org.apache.nutch.util.NutchConfiguration;
 
 /**
  * Filters URLs based on a file of regular expressions using the
  * {@link java.util.regex Java Regex implementation}.
  */
-public class RegexURLFilter extends RegexURLFilterBase {
+public class RegexURLFilterIndex extends RegexURLFilterBase {
 
   public static final String URLFILTER_REGEX_FILE = "urlfilter.regex.file";
   public static final String URLFILTER_REGEX_RULES = "urlfilter.regex.rules";
 
-  public RegexURLFilter() {
+  public RegexURLFilterIndex() {
     super();
   }
 
-  public RegexURLFilter(String filename) throws IOException,
+  public RegexURLFilterIndex(String filename) throws IOException,
       PatternSyntaxException {
     super(filename);
   }
 
-  RegexURLFilter(Reader reader) throws IOException, IllegalArgumentException {
+  RegexURLFilterIndex(Reader reader) throws IOException,
+      IllegalArgumentException {
     super(reader);
   }
 
   /*
-   * ----------------------------------- * <implementation:RegexURLFilterBase> *
+   * ----------------------------------- *
+   * <implementation:RegexURLFilterIndexBase> *
    * -----------------------------------
    */
 
@@ -75,12 +76,13 @@ public class RegexURLFilter extends RegexURLFilterBase {
   }
 
   /*
-   * ------------------------------------ * </implementation:RegexURLFilterBase>
-   * * ------------------------------------
+   * ------------------------------------ *
+   * </implementation:RegexURLFilterIndexBase> *
+   * ------------------------------------
    */
 
   public static void main(String args[]) throws IOException {
-    RegexURLFilter filter = new RegexURLFilter();
+    RegexURLFilterIndex filter = new RegexURLFilterIndex();
     filter.setConf(NutchConfiguration.create());
     main(filter, args);
   }

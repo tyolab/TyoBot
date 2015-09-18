@@ -31,6 +31,10 @@ public class AtireWriter implements NutchIndexWriter {
 
   public static Logger LOG = LoggerFactory.getLogger(AtireWriter.class);
 
+  private static String[] META = { "keywords", "description" };
+
+  private static String[] FILEDS = { "site", "id", "title" };
+
   private static final int DEFAULT_MAX_BULK_DOCS = 500;
   private static final int DEFAULT_MAX_BULK_LENGTH = 5001001; // ~5MB
 
@@ -59,6 +63,17 @@ public class AtireWriter implements NutchIndexWriter {
 
     // Loop through all fields of this doc
     for (String fieldName : doc.getFieldNames()) {
+      if (fieldName.equals("site")) {
+
+      } else if (fieldName.equals("title")) {
+
+      } else if (fieldName.equals("id")) {
+
+      } else if (fieldName.equals("")) {
+
+      } else if (fieldName.equals("")) {
+
+      }
       if (doc.getFieldValues(fieldName).size() > 1) {
         source.put(fieldName, doc.getFieldValues(fieldName));
         // Loop through the values to keep track of the size of this document
@@ -106,26 +121,27 @@ public class AtireWriter implements NutchIndexWriter {
             DEFAULT_MAX_BULK_LENGTH);
   }
 
-  public static String stripNonCharCodepoints(String input) {
-    StringBuilder retval = new StringBuilder();
-    char ch;
-
-    for (int i = 0; i < input.length(); i++) {
-      ch = input.charAt(i);
-
-      // Strip all non-characters
-      // http://unicode.org/cldr/utility/list-unicodeset.jsp?a=[:Noncharacter_Code_Point=True:]
-      // and non-printable control characters except tabulator, new line and
-      // carriage return
-      if (ch % 0x10000 != 0xffff && // 0xffff - 0x10ffff range step 0x10000
-          ch % 0x10000 != 0xfffe && // 0xfffe - 0x10fffe range
-          (ch <= 0xfdd0 || ch >= 0xfdef) && // 0xfdd0 - 0xfdef
-          (ch > 0x1F || ch == 0x9 || ch == 0xa || ch == 0xd)) {
-
-        retval.append(ch);
-      }
-    }
-
-    return retval.toString();
-  }
+  // public static String stripNonCharCodepoints(String input) {
+  // StringBuilder retval = new StringBuilder();
+  // char ch;
+  //
+  // for (int i = 0; i < input.length(); i++) {
+  // ch = input.charAt(i);
+  //
+  // // Strip all non-characters
+  // //
+  // http://unicode.org/cldr/utility/list-unicodeset.jsp?a=[:Noncharacter_Code_Point=True:]
+  // // and non-printable control characters except tabulator, new line and
+  // // carriage return
+  // if (ch % 0x10000 != 0xffff && // 0xffff - 0x10ffff range step 0x10000
+  // ch % 0x10000 != 0xfffe && // 0xfffe - 0x10fffe range
+  // (ch <= 0xfdd0 || ch >= 0xfdef) && // 0xfdd0 - 0xfdef
+  // (ch > 0x1F || ch == 0x9 || ch == 0xa || ch == 0xd)) {
+  //
+  // retval.append(ch);
+  // }
+  // }
+  //
+  // return retval.toString();
+  // }
 }
