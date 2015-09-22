@@ -23,28 +23,7 @@ public class ParseThumbnailJob extends ParserJob {
     ParserJob.mapperClass = ParseThumbnailMapper.class;
   }
 
-  public static class ParseThumbnailMapper extends
-      GoraMapper<String, WebPage, String, WebPage> {
-    private ParseUtil parseUtil;
-
-    private boolean shouldResume;
-
-    private boolean force;
-
-    private Utf8 batchId;
-
-    private boolean skipTruncated;
-
-    @Override
-    public void setup(Context context) throws IOException {
-      Configuration conf = context.getConfiguration();
-      parseUtil = new ParseUtil(conf);
-      shouldResume = conf.getBoolean(RESUME_KEY, false);
-      force = conf.getBoolean(FORCE_KEY, false);
-      batchId =
-          new Utf8(conf.get(GeneratorJob.BATCH_ID, Nutch.ALL_BATCH_ID_STR));
-      skipTruncated = conf.getBoolean(SKIP_TRUNCATED, true);
-    }
+  public static class ParseThumbnailMapper extends ParserMapper {
 
     @Override
     public void map(String key, WebPage page, Context context)

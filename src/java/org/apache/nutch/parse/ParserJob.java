@@ -80,15 +80,15 @@ public class ParserJob extends NutchTool implements Tool {
 
   public static class ParserMapper extends
       GoraMapper<String, WebPage, String, WebPage> {
-    private ParseUtil parseUtil;
+    protected ParseUtil parseUtil;
 
-    private boolean shouldResume;
+    protected boolean shouldResume;
 
-    private boolean force;
+    protected boolean force;
 
-    private Utf8 batchId;
+    protected Utf8 batchId;
 
-    private boolean skipTruncated;
+    protected boolean skipTruncated;
 
     @Override
     public void setup(Context context) throws IOException {
@@ -237,7 +237,7 @@ public class ParserJob extends NutchTool implements Tool {
     }
     if (shouldResume != null) {
       getConf().setBoolean(RESUME_KEY, shouldResume);
-    }ParserMapper.class
+    }
     if (force != null) {
       getConf().setBoolean(FORCE_KEY, force);
     }
