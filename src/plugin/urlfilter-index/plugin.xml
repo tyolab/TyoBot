@@ -34,9 +34,9 @@
 
    <extension id="org.apache.nutch.net.urlfilter.index"
               name="Nutch Regex URL Filter for Indexer"
-              point="org.apache.nutch.net.URLFilter">
-      <implementation id="RegexURLFilter"
-                      class="org.apache.nutch.urlfilter.regex.RegexURLFilter"/>
+              point="org.apache.nutch.net.URLFilterContent">
+      <implementation id="RegexURLFilterIndex"
+                      class="org.apache.nutch.urlfilter.index.RegexURLFilterIndex"/>
       <!-- by default, attribute "file" is undefined, to keep classic behavior.
       <implementation id="RegexURLFilter"
                       class="org.apache.nutch.net.RegexURLFilter">

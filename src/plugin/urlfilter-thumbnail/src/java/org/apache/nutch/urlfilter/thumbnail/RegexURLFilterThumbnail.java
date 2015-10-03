@@ -34,8 +34,9 @@ import org.apache.nutch.util.NutchConfiguration;
  */
 public class RegexURLFilterThumbnail extends RegexURLFilterBase {
 
-  public static final String URLFILTER_REGEX_FILE = "urlfilter.regex.file";
-  public static final String URLFILTER_REGEX_RULES = "urlfilter.regex.rules";
+  public static final String URLFILTER_REGEX_FILE = "urlfilter.regex.file.list";
+  public static final String URLFILTER_REGEX_RULES =
+      "urlfilter.regex.rules.list";
 
   public RegexURLFilterThumbnail() {
     super();

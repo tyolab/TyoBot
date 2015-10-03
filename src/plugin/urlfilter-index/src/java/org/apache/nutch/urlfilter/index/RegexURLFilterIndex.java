@@ -34,8 +34,10 @@ import org.apache.nutch.util.NutchConfiguration;
  */
 public class RegexURLFilterIndex extends RegexURLFilterBase {
 
-  public static final String URLFILTER_REGEX_FILE = "urlfilter.regex.file";
-  public static final String URLFILTER_REGEX_RULES = "urlfilter.regex.rules";
+  public static final String URLFILTER_REGEX_FILE =
+      "urlfilter.regex.file.content";
+  public static final String URLFILTER_REGEX_RULES =
+      "urlfilter.regex.rules.content";
 
   public RegexURLFilterIndex() {
     super();

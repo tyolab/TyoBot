@@ -34,9 +34,9 @@
 
    <extension id="org.apache.nutch.net.urlfilter.thumbnail"
               name="Nutch Regex URL Filter for Thumbnail"
-              point="org.apache.nutch.net.URLFilterThumbnail">
-      <implementation id="RegexURLFilter"
-                      class="org.apache.nutch.urlfilter.thumbnail.RegexURLFilter"/>
+              point="org.apache.nutch.net.URLFilterList">
+      <implementation id="RegexURLFilterThumbnail"
+                      class="org.apache.nutch.urlfilter.thumbnail.RegexURLFilterThumbnail"/>
       <!-- by default, attribute "file" is undefined, to keep classic behavior.
       <implementation id="RegexURLFilter"
                       class="org.apache.nutch.net.RegexURLFilter">

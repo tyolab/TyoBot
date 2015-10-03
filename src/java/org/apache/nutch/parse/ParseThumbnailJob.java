@@ -25,6 +25,17 @@ public class ParseThumbnailJob extends ParserJob {
 
   public static class ParseThumbnailMapper extends ParserMapper {
 
+    private ParseThumbUtil parseThumbUtil;
+
+    @Override
+    public void setup(Context context) throws IOException {
+      super.setup(context);
+
+      Configuration conf = context.getConfiguration();
+      parseThumbUtil = new ParseThumbUtil(conf);
+
+    }
+
     @Override
     public void map(String key, WebPage page, Context context)
         throws IOException, InterruptedException {

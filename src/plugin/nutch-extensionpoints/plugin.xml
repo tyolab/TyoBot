@@ -45,11 +45,11 @@
       name="Nutch URL Filter"/>
       
 <extension-point
-      id="org.apache.nutch.net.URLFilterIndex"
+      id="org.apache.nutch.net.URLFilterContent"
       name="Nutch URL Filter for Indexer"/>      
       
 <extension-point
-      id="org.apache.nutch.net.URLFilterThumbnail"
+      id="org.apache.nutch.net.URLFilterList"
       name="Nutch URL Filter for Thumbnail Parser and Fetcher"/>      
 
 <extension-point

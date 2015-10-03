@@ -6,6 +6,8 @@ package org.apache.nutch.net;
  * which means only the urls that provide real content for consumption 
  */
 
-public class URLFilterContent {
+public interface URLFilterContent extends URLFilter {
+
+  public final static String X_POINT_ID = URLFilterContent.class.getName();
 
 }
