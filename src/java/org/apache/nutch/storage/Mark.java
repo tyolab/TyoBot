@@ -19,8 +19,9 @@ package org.apache.nutch.storage;
 import org.apache.avro.util.Utf8;
 
 public enum Mark {
-  INJECT_MARK("_injmrk_"), GENERATE_MARK("_gnmrk_"), FETCH_MARK("_ftcmrk_"),
-  PARSE_MARK("__prsmrk__"), UPDATEDB_MARK("_updmrk_"), INDEX_MARK("_idxmrk_");
+  INJECT_MARK("_injmrk_"), GENERATE_MARK("_gnmrk_"), FETCH_MARK("_ftcmrk_"), PARSE_MARK(
+      "__prsmrk__"), PARSETHUMBNAIL_MARK("__prsthumrk__"), UPDATEDB_MARK(
+      "_updmrk_"), INDEX_MARK("_idxmrk_");
 
   private Utf8 name;
 
@@ -29,7 +30,8 @@ public enum Mark {
   }
 
   public void putMark(WebPage page, Utf8 markValue) {
-    page.putToMarkers(name, markValue);
+    if (null != markValue)
+      page.putToMarkers(name, markValue);
   }
 
   public void putMark(WebPage page, String markValue) {
@@ -46,6 +48,7 @@ public enum Mark {
 
   /**
    * Remove the mark only if the mark is present on the page.
+   * 
    * @param page The page to remove the mark from.
    * @return If the mark was present.
    */

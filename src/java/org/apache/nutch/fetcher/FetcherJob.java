@@ -103,7 +103,9 @@ public class FetcherJob extends NutchTool implements Tool {
     @Override
     protected void setup(Context context) {
       Configuration conf = context.getConfiguration();
-      shouldContinue = conf.getBoolean(RESUME_KEY, false);
+
+      // we should always resume by default, why not?
+      shouldContinue = conf.getBoolean(RESUME_KEY, true);
       batchId =
           new Utf8(conf.get(GeneratorJob.BATCH_ID, Nutch.ALL_BATCH_ID_STR));
     }

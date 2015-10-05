@@ -63,15 +63,17 @@ public class ParseUtil extends Configured {
   private static final int DEFAULT_MAX_PARSE_TIME = 30;
 
   private Configuration conf;
-  private Signature sig;
-  private URLFilters filters;
-  private URLNormalizers normalizers;
-  private int maxOutlinks;
-  private boolean ignoreExternalLinks;
-  private ParserFactory parserFactory;
+  protected Signature sig;
+  protected URLFilters filters;
+  protected URLNormalizers normalizers;
+  protected int maxOutlinks;
+  protected boolean ignoreExternalLinks;
+  protected ParserFactory parserFactory;
   /** Parser timeout set to 30 sec by default. Set -1 to deactivate **/
-  private int maxParseTime;
-  private ExecutorService executorService;
+  protected int maxParseTime;
+  protected ExecutorService executorService;
+
+  protected boolean checkFetchStatus;
 
   /**
    *
@@ -90,6 +92,7 @@ public class ParseUtil extends Configured {
   @Override
   public void setConf(Configuration conf) {
     this.conf = conf;
+    checkFetchStatus = true;
     parserFactory = new ParserFactory(conf);
     maxParseTime = conf.getInt("parser.timeout", DEFAULT_MAX_PARSE_TIME);
     sig = SignatureFactory.getSignature(conf);
@@ -174,13 +177,16 @@ public class ParseUtil extends Configured {
    */
   public void process(String key, WebPage page) {
     String url = TableUtil.unreverseUrl(key);
-    byte status = (byte) page.getStatus();
-    if (status != CrawlStatus.STATUS_FETCHED) {
-      // if (LOG.isDebugEnabled()) {
-      LOG.debug("Skipping " + url + " as status is: "
-          + CrawlStatus.getName(status));
-      // }
-      return;
+
+    if (checkFetchStatus) {
+      byte status = (byte) page.getStatus();
+      if (status != CrawlStatus.STATUS_FETCHED) {
+        // if (LOG.isDebugEnabled()) {
+        LOG.debug("Skipping " + url + " as status is: "
+            + CrawlStatus.getName(status));
+        // }
+        return;
+      }
     }
 
     Parse parse;

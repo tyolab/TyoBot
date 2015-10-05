@@ -9,6 +9,8 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.nutch.crawl.GeneratorJob;
 import org.apache.nutch.metadata.Nutch;
+import org.apache.nutch.net.URLFilterException;
+import org.apache.nutch.net.URLFiltersList;
 import org.apache.nutch.storage.Mark;
 import org.apache.nutch.storage.ParseStatus;
 import org.apache.nutch.storage.WebPage;
@@ -27,6 +29,8 @@ public class ParseThumbnailJob extends ParserJob {
 
     private ParseThumbUtil parseThumbUtil;
 
+    private URLFiltersList filtersList;
+
     @Override
     public void setup(Context context) throws IOException {
       super.setup(context);
@@ -34,6 +38,7 @@ public class ParseThumbnailJob extends ParserJob {
       Configuration conf = context.getConfiguration();
       parseThumbUtil = new ParseThumbUtil(conf);
 
+      filtersList = new URLFiltersList(conf);
     }
 
     @Override
@@ -41,40 +46,52 @@ public class ParseThumbnailJob extends ParserJob {
         throws IOException, InterruptedException {
       Utf8 mark = Mark.FETCH_MARK.checkMark(page);
       String unreverseKey = TableUtil.unreverseUrl(key);
-      if (batchId.equals(REPARSE)) {
-        LOG.debug("Reparsing " + unreverseKey);
-      } else {
-        if (!batchId.toString().equals(Nutch.ALL_BATCH_ID_STR)
-            && !NutchJob.shouldProcess(mark, batchId)) {
-          LOG.info("Skipping " + TableUtil.unreverseUrl(key)
-              + "; different batch id (" + mark + ")");
-          return;
-        }
-        Utf8 parseMark = Mark.PARSE_MARK.checkMark(page);
-        if (shouldResume && parseMark != null) {
-          if (force) {
-            LOG.info("Forced parsing " + unreverseKey + "; already parsed");
-          } else {
-            LOG.info("Skipping " + unreverseKey + "; already parsed");
-            return;
-          }
-        } else {
-          LOG.info("Parsing " + unreverseKey);
-        }
-      }
 
-      if (skipTruncated && isTruncated(unreverseKey, page)) {
+      String newUrl = null;
+      try {
+        newUrl = filtersList.filter(unreverseKey);
+      } catch (URLFilterException e) {
+        LOG.warn("error filtering " + newUrl);
         return;
       }
 
-      parseUtil.process(key, page);
-      ParseStatus pstatus = page.getParseStatus();
-      if (pstatus != null) {
-        context.getCounter("ParserStatus",
-            ParseStatusCodes.majorCodes[pstatus.getMajorCode()]).increment(1);
-      }
+      if (newUrl != null) {
 
-      context.write(key, page);
+        if (batchId.equals(REPARSE)) {
+          LOG.debug("Reparsing " + unreverseKey);
+        } else {
+          if (!batchId.toString().equals(Nutch.ALL_BATCH_ID_STR)
+              && !NutchJob.shouldProcess(mark, batchId)) {
+            LOG.info("Skipping " + TableUtil.unreverseUrl(key)
+                + "; different batch id (" + mark + ")");
+            return;
+          }
+          Utf8 parseMark = Mark.PARSETHUMBNAIL_MARK.checkMark(page);
+          if (shouldResume && parseMark != null) {
+            if (force) {
+              LOG.info("Forced parsing " + unreverseKey + "; already parsed");
+            } else {
+              LOG.info("Skipping " + unreverseKey + "; already parsed");
+              return;
+            }
+          } else {
+            LOG.info("Finding thumbnail link for " + unreverseKey);
+          }
+        }
+
+        if (skipTruncated && isTruncated(unreverseKey, page)) {
+          return;
+        }
+
+        parseThumbUtil.process(context, key, page);
+        // ParseStatus pstatus = page.getParseStatus();
+        // if (pstatus != null) {
+        // context.getCounter("ParserStatus",
+        // ParseStatusCodes.majorCodes[pstatus.getMajorCode()]).increment(1);
+        // }
+        //
+        // context.write(key, page);
+      }
     }
   }
 
