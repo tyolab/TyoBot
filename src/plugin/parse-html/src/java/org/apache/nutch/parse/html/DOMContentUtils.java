@@ -38,15 +38,22 @@ import org.w3c.dom.*;
  */
 public class DOMContentUtils {
 
+  public enum LinkType {
+    A_LINK, AREA, FORM, IMAGE, FRAME, IFRAME, SCRIPT, LINK /* CSS, etc. */
+  };
+
   public static class LinkParams {
     public String elName;
     public String attrName;
     public int childLen;
+    public LinkType type;
 
-    public LinkParams(String elName, String attrName, int childLen) {
+    public LinkParams(String elName, String attrName, int childLen,
+        LinkType type) {
       this.elName = elName;
       this.attrName = attrName;
       this.childLen = childLen;
+      this.type = type;
     }
 
     public String toString() {
@@ -67,19 +74,24 @@ public class DOMContentUtils {
 
     linkParams.clear();
     // a link doesn't have to include an anchor
-    linkParams.put("a", new LinkParams("a", "href", 0)); // originally set to
-                                                         // one
-    linkParams.put("area", new LinkParams("area", "href", 0));
+    linkParams.put("a", new LinkParams("a", "href", 0, LinkType.A_LINK)); // originally
+                                                                          // set
+                                                                          // to
+    // one
+    linkParams.put("area", new LinkParams("area", "href", 0, LinkType.AREA));
     if (conf.getBoolean("parser.html.form.use_action", true)) {
-      linkParams.put("form", new LinkParams("form", "action", 1));
+      linkParams
+          .put("form", new LinkParams("form", "action", 1, LinkType.FORM));
       if (conf.get("parser.html.form.use_action") != null)
         forceTags.add("form");
     }
-    linkParams.put("frame", new LinkParams("frame", "src", 0));
-    linkParams.put("iframe", new LinkParams("iframe", "src", 0));
-    linkParams.put("script", new LinkParams("script", "src", 0));
-    linkParams.put("link", new LinkParams("link", "href", 0));
-    linkParams.put("img", new LinkParams("img", "src", 0));
+    linkParams.put("frame", new LinkParams("frame", "src", 0, LinkType.FRAME));
+    linkParams.put("iframe",
+        new LinkParams("iframe", "src", 0, LinkType.IFRAME));
+    linkParams.put("script",
+        new LinkParams("script", "src", 0, LinkType.SCRIPT));
+    linkParams.put("link", new LinkParams("link", "href", 0, LinkType.LINK));
+    linkParams.put("img", new LinkParams("img", "src", 0, LinkType.IMAGE));
 
     // remove unwanted link tags from the linkParams map
     String[] ignoreTags = conf.getStrings("parser.html.outlinks.ignore_tags");
@@ -397,8 +409,11 @@ public class DOMContentUtils {
                 URL url =
                     (base.toString().indexOf(';') > 0) ? fixEmbeddedParams(
                         base, target) : new URL(base, target);
-                outlinks.add(new Outlink(url.toString(), linkText.toString()
-                    .trim()));
+                Outlink outlink =
+                    new Outlink(url.toString(), linkText.toString().trim());
+                outlink.setType(params.type);
+
+                outlinks.add(outlink);
               } catch (MalformedURLException e) {
                 // don't care
               }

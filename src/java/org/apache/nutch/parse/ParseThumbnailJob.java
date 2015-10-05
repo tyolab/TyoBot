@@ -38,7 +38,7 @@ public class ParseThumbnailJob extends ParserJob {
       Configuration conf = context.getConfiguration();
       parseThumbUtil = new ParseThumbUtil(conf);
 
-      filtersList = new URLFiltersList(conf);
+      filtersList = parseThumbUtil.getFiltersList();
     }
 
     @Override
