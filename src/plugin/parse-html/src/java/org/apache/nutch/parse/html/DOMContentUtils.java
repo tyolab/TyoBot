@@ -413,7 +413,28 @@ public class DOMContentUtils {
                     new Outlink(url.toString(), linkText.toString().trim());
                 outlink.setType(params.type);
 
+                /*
+                 * some of the thumbnail links are not stored in src attribute
+                 * so we need all of them
+                 */
+                if (params.type == LinkType.IMAGE) {
+                  for (int i = 0; i < attrs.getLength(); i++) {
+                    Node attr = attrs.item(i);
+                    String attrName = attr.getNodeName();
+
+                    /*
+                     * some of cites would use a image holder and replace it
+                     * dynamically
+                     */
+                    if (attrName.startsWith("data")) {
+                      String value = attr.getNodeValue();
+                      outlink.addAttribute(attrName, value);
+                    }
+                  }
+                }
+
                 outlinks.add(outlink);
+
               } catch (MalformedURLException e) {
                 // don't care
               }

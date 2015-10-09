@@ -19,6 +19,8 @@ package org.apache.nutch.parse;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.hadoop.io.*;
 import org.apache.nutch.parse.html.DOMContentUtils.LinkType;
@@ -31,7 +33,10 @@ public class Outlink implements Writable {
 
   private LinkType type;
 
+  private Map<String, String> attributes;
+
   public Outlink() {
+    attributes = null;
   }
 
   public Outlink(String toUrl, String anchor) throws MalformedURLException {
@@ -79,6 +84,13 @@ public class Outlink implements Writable {
     this.type = type;
   }
 
+  public void addAttribute(String key, String value) {
+    if (attributes == null)
+      attributes = new HashMap<String, String>();
+
+    attributes.put(key, value);
+  }
+
   public boolean equals(Object o) {
     if (!(o instanceof Outlink))
       return false;
@@ -89,6 +101,14 @@ public class Outlink implements Writable {
   public String toString() {
     return "toUrl: " + toUrl + " anchor: " + anchor; // removed "\n". toString,
                                                      // not printLine... WD.
+  }
+
+  public boolean hasAttributes() {
+    return attributes != null && attributes.size() > 0;
+  }
+
+  public Map<String, String> getAttributes() {
+    return attributes;
   }
 
 }

@@ -75,7 +75,7 @@ public class ParseThumbnailJob extends ParserJob {
               return;
             }
           } else {
-            LOG.info("Finding thumbnail link for " + unreverseKey);
+            LOG.info("Finding thumbnail links for page " + unreverseKey);
           }
         }
 

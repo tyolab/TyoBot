@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+
+import javafx.scene.web.WebHistory.Entry;
 
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
@@ -18,11 +23,13 @@ import org.apache.nutch.net.URLFilterException;
 import org.apache.nutch.net.URLFiltersContent;
 import org.apache.nutch.net.URLFiltersList;
 import org.apache.nutch.net.URLNormalizers;
+import org.apache.nutch.parse.html.DOMContentUtils.LinkType;
 import org.apache.nutch.storage.Mark;
 import org.apache.nutch.storage.ParseStatus;
 import org.apache.nutch.storage.WebPage;
 import org.apache.nutch.util.TableUtil;
 import org.apache.nutch.util.URLUtil;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,9 +227,22 @@ public class ParseThumbUtil extends ParseUtil {
     outlinks = getOutlinkArray(key, page);
 
     if (outlinks != null && outlinks.length > 0) {
-      System.out.println("Url: " + url + ", Status: "
-          + (pstatus != null ? pstatus.getMajorCode() : -100)
-          + ", Link Number: " + (null != outlinks ? outlinks.length : 0));
+      String msg =
+          "Url: " + url + ", Status: "
+              + (pstatus != null ? pstatus.getMajorCode() : -100)
+              + ", Link Number: " + (null != outlinks ? outlinks.length : 0);
+      Log.debug(msg);
+      System.out.println(msg);
+
+      /*
+       * if the first link is the content link, the thumbnail must be the next
+       * one
+       */
+      ArrayList<Integer> ids = new ArrayList<Integer>();
+      int operation = 1; /*
+                          * -1 mean the thumbnail image is above the link,
+                          * otherwise under it
+                          */
 
       for (int i = 0; i < outlinks.length; i++) {
         Outlink outlink = outlinks[i];
@@ -244,18 +264,64 @@ public class ParseThumbUtil extends ParseUtil {
         } else {
           // LOG.info("found link: " + toUrl);
           System.out.println("found link: " + toUrl);
-
-          /*
-           * if the first link is the content link, the thumbnail must be the
-           * next one
-           */
-          int imageIndex = i + 1;
-
-          break;
+          ids.add(i);
         }
       }
 
-    }
-  }
+      if (ids.size() > 0) {
+        /*
+         * now decide it is under or over
+         */
+        int lastId = ids.get(ids.size() - 1);
+        if (lastId == (outlinks.length - 1))
+          operation = -1;
+        else {
+          Outlink lastTestLink = outlinks[lastId + 1];
 
+          if (lastTestLink.getType() == LinkType.IMAGE)
+            operation = +1;
+          else
+            operation = -1;
+        }
+
+        for (int i : ids) {
+          int imageIndex = i + operation;
+
+          if (imageIndex < outlinks.length) {
+            Outlink contentLink = outlinks[i];
+            Outlink next = outlinks[imageIndex];
+
+            if (next.getType() == LinkType.IMAGE) {
+              String toUrl = contentLink.getToUrl();
+
+              WebPage contentPage = new WebPage();
+
+              String thumbUrl = next.getToUrl();
+
+              String contentKey = TableUtil.reverseUrl(toUrl);
+
+              if (next.hasAttributes()) {
+                Map<String, String> attributes = next.getAttributes();
+                Set<Map.Entry<String, String>> values = attributes.entrySet();
+                Iterator<Map.Entry<String, String>> it = values.iterator();
+
+                while (it.hasNext()) {
+                  Map.Entry entry = (Map.Entry) it.next();
+                  String attrName = (String) entry.getKey();
+                  if (attrName.startsWith("data")) {
+                    thumbUrl = (String) entry.getValue();
+                    break;
+                  }
+                }
+              }
+              contentPage.setThumbUrl(new Utf8(thumbUrl));
+
+              context.write(contentKey, contentPage);
+            }
+          }
+        }
+      }
+    }
+
+  }
 }
