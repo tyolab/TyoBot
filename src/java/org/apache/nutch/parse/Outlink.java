@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.apache.hadoop.io.*;
-import org.apache.nutch.parse.html.DOMContentUtils.LinkType;
+import org.apache.nutch.net.URLConstants.LinkType;
 
 /* An outgoing link from a page. */
 public class Outlink implements Writable {

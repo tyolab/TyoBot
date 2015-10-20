@@ -22,9 +22,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.avro.util.Utf8;
+import org.apache.commons.math.util.OpenIntToDoubleHashMap.Iterator;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -98,7 +101,7 @@ public class FetcherJob extends NutchTool implements Tool {
 
     private Random random = new Random();
 
-    private String NULL_BATCH_ID = "null";
+    private String NULL_BATCH_ID = "-null";
 
     @Override
     protected void setup(Context context) {
@@ -115,6 +118,24 @@ public class FetcherJob extends NutchTool implements Tool {
         throws IOException, InterruptedException {
       try {
         Utf8 mark = Mark.GENERATE_MARK.checkMark(page);
+
+        if (key
+            .equals("com.youjizz.www:http/videos/italian-mother-knows-what-to-do-2183715.html"))
+          LOG.debug("I want to debug this batch id");
+
+        if (null != mark) {
+          String batch = mark.toString();
+          if (!instance.uniqBatches.contains(batch))
+            instance.uniqBatches.add(batch);
+
+          if (batch.equals("1441612771-125848896"))
+            LOG.debug("I want to debug this batch id");
+        } else {
+          /* i want to check the mark again */
+          mark = Mark.GENERATE_MARK.checkMark(page);
+          LOG.info("skipping null mark page " + key);
+        }
+
         if ((null == mark && !(batchId.toString().equals(NULL_BATCH_ID) || batchId
             .toString().equals(Nutch.ALL_BATCH_ID_STR)))
             || (null != mark && !NutchJob.shouldProcess(mark, batchId))) {
@@ -153,6 +174,11 @@ public class FetcherJob extends NutchTool implements Tool {
   private int skippingCountDiffBatchId = 0;
 
   private int skippingCountFetched = 0;
+
+  /*
+   * for ebug
+   */
+  private Set<String> uniqBatches = new HashSet<String>();
 
   public FetcherJob() {
 
@@ -250,6 +276,13 @@ public class FetcherJob extends NutchTool implements Tool {
 
     run(ToolUtil.toArgMap(Nutch.ARG_BATCH, batchId, Nutch.ARG_THREADS, threads,
         Nutch.ARG_RESUME, shouldResume, Nutch.ARG_NUMTASKS, numTasks));
+
+    Log.info("All batches:");
+    java.util.Iterator<String> it = uniqBatches.iterator();
+    while (it.hasNext()) {
+      String batch = it.next();
+      LOG.info(batch);
+    }
 
     LOG.info("FetcherJob: skipped " + String.valueOf(skippingCountDiffBatchId)
         + " urls with different bactch id");

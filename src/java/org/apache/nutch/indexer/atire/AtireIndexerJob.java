@@ -16,25 +16,66 @@
  */
 package org.apache.nutch.indexer.atire;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.nutch.indexer.IndexerJob;
 import org.apache.nutch.indexer.NutchIndexWriterFactory;
 import org.apache.nutch.metadata.Nutch;
+import org.apache.nutch.net.URLFilterException;
+import org.apache.nutch.net.URLFiltersContent;
+import org.apache.nutch.parse.ParseUtil;
+import org.apache.nutch.storage.WebPage;
 import org.apache.nutch.util.NutchConfiguration;
+import org.apache.nutch.util.TableUtil;
 import org.apache.nutch.util.ToolUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Indexer for elasticsearch. Uses bulk operations with flushing in the
- * background, keeping track of elasticsearch responses by checking after every
+ * Indexer for atire search. Uses bulk operations with flushing in the
+ * background, keeping track of atire search responses by checking after every
  * flush. When a previous flush has not finished yet before the next bulk is
  * full, it will wait for it. This mechanism will keep the servers from
  * overloading.
  */
 public class AtireIndexerJob extends IndexerJob {
+
+  static {
+    LOG = LoggerFactory.getLogger(AtireIndexerJob.class);
+    IndexerJob.indexerMapperCls = AtireMapper.class;
+  }
+
+  public static class AtireMapper extends IndexerMapper {
+
+    private URLFiltersContent filtersContent;
+
+    @Override
+    public void setup(Context context) throws IOException {
+      super.setup(context);
+
+      filtersContent = new URLFiltersContent(context.getConfiguration());
+    }
+
+    @Override
+    public void map(String key, WebPage page, Context context)
+        throws IOException, InterruptedException {
+      String url = TableUtil.unreverseUrl(key);
+
+      String toUrl = null;
+      try {
+        toUrl = filtersContent.filter(url);
+      } catch (URLFilterException e) {
+        e.printStackTrace();
+      }
+
+      if (null != toUrl)
+        super.map(key, page, context);
+    }
+
+  }
 
   public static Logger LOG = LoggerFactory.getLogger(AtireIndexerJob.class);
 
@@ -58,8 +99,10 @@ public class AtireIndexerJob extends IndexerJob {
     return results;
   }
 
-  public void indexAtire(String batchId) throws Exception {
-    run(ToolUtil.toArgMap(Nutch.ARG_BATCH, batchId));
+  public void indexAtire(String batchId, boolean withThumbPageOnly)
+      throws Exception {
+    run(ToolUtil.toArgMap(Nutch.ARG_BATCH, batchId,
+        AtireConstants.WITH_THUMBNAIL_PAGE_ONLY, withThumbPageOnly));
   }
 
   public int run(String[] args) throws Exception {
@@ -69,10 +112,16 @@ public class AtireIndexerJob extends IndexerJob {
       getConf().set(Nutch.CRAWL_ID_KEY, args[2]);
     } else {
       System.err
-          .println("Usage: (<batchId> | -all | -reindex) [-crawlId <id>]");
+          .println("Usage: (<batchId> | -all | -reindex) [-withThumbPageOnly] [-crawlId <id>]");
       return -1;
     }
-    indexAtire(args[0]);
+
+    boolean withThumbPageOnly = false;
+
+    for (int i = 0; i < args.length; ++i) {
+
+    }
+    indexAtire(args[0], withThumbPageOnly);
     return 0;
   }
 

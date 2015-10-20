@@ -23,10 +23,10 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.nutch.net.URLConstants.LinkType;
 import org.apache.nutch.parse.Outlink;
 import org.apache.nutch.util.NodeWalker;
 import org.apache.hadoop.conf.Configuration;
-
 import org.w3c.dom.*;
 
 /**
@@ -37,10 +37,6 @@ import org.w3c.dom.*;
  *
  */
 public class DOMContentUtils {
-
-  public enum LinkType {
-    A_LINK, AREA, FORM, IMAGE, FRAME, IFRAME, SCRIPT, LINK /* CSS, etc. */
-  };
 
   public static class LinkParams {
     public String elName;

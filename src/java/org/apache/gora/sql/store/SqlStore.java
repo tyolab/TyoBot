@@ -647,6 +647,13 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       insert.addBatch();
       synchronized (writeCache) {
         writeCache.add(insert);
+
+        /*
+         * TODO set the magic number in the configuration
+         */
+        int size = writeCache.size();
+        if (size >= 1000)
+          flush();
       }
 
     } catch (Exception ex) {

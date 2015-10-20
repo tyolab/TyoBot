@@ -19,11 +19,11 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.nutch.crawl.CrawlStatus;
 import org.apache.nutch.fetcher.FetcherJob;
+import org.apache.nutch.net.URLConstants.LinkType;
 import org.apache.nutch.net.URLFilterException;
 import org.apache.nutch.net.URLFiltersContent;
 import org.apache.nutch.net.URLFiltersList;
 import org.apache.nutch.net.URLNormalizers;
-import org.apache.nutch.parse.html.DOMContentUtils.LinkType;
 import org.apache.nutch.storage.Mark;
 import org.apache.nutch.storage.ParseStatus;
 import org.apache.nutch.storage.WebPage;
@@ -36,7 +36,8 @@ import org.slf4j.LoggerFactory;
 public class ParseThumbUtil extends ParseUtil {
 
   /* our log stream */
-  public static final Logger LOG = LoggerFactory.getLogger(ParseUtil.class);
+  public static final Logger LOG = LoggerFactory
+      .getLogger(ParseThumbUtil.class);
 
   // private Configuration conf;
 
@@ -231,7 +232,7 @@ public class ParseThumbUtil extends ParseUtil {
           "Url: " + url + ", Status: "
               + (pstatus != null ? pstatus.getMajorCode() : -100)
               + ", Link Number: " + (null != outlinks ? outlinks.length : 0);
-      Log.debug(msg);
+      LOG.debug(msg);
       System.out.println(msg);
 
       /*

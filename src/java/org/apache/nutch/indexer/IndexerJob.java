@@ -50,6 +50,8 @@ public abstract class IndexerJob extends NutchTool implements Tool {
   private static final Collection<WebPage.Field> FIELDS =
       new HashSet<WebPage.Field>();
 
+  protected static Class indexerMapperCls = IndexerMapper.class;
+
   private static final Utf8 REINDEX = new Utf8("-reindex");
 
   static {
@@ -138,7 +140,7 @@ public abstract class IndexerJob extends NutchTool implements Tool {
 
     Collection<WebPage.Field> fields = getFields(job);
     StorageUtils.initMapperJob(job, fields, String.class, NutchDocument.class,
-        IndexerMapper.class);
+        indexerMapperCls);
     job.setNumReduceTasks(0);
     job.setOutputFormatClass(IndexerOutputFormat.class);
     return job;
