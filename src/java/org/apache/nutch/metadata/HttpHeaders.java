@@ -16,18 +16,17 @@
  */
 package org.apache.nutch.metadata;
 
-
-
 /**
  * A collection of HTTP header names.
- *
- * @see <a href="http://rfc-ref.org/RFC-TEXTS/2616/">Hypertext Transfer
- *      Protocol -- HTTP/1.1 (RFC 2616)</a>
- *
+ * 
+ * @see <a href="http://rfc-ref.org/RFC-TEXTS/2616/">Hypertext Transfer Protocol
+ *      -- HTTP/1.1 (RFC 2616)</a>
+ * 
  * @author Chris Mattmann
  * @author J&eacute;r&ocirc;me Charron
  */
 public interface HttpHeaders {
+  public final static String TRANSFER_ENCODING = "Transfer-Encoding";
 
   public final static String CONTENT_ENCODING = "Content-Encoding";
 

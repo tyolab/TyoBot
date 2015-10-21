@@ -74,6 +74,26 @@
     <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->default" />
 
     <dependency org="com.google.guava" name="guava" rev="11.0.2" />
+    <dependency org="com.google.code.crawler-commons" name="crawler-commons" rev="0.5" />
+    
+	<dependency org="org.restlet.jse" name="org.restlet" rev="2.2.3" conf="*->default" />
+    <dependency org="org.restlet.jse" name="org.restlet.ext.jackson" rev="2.2.3" 
+      conf="*->default" />
+    <dependency org="org.restlet.jse" name="org.restlet.ext.jaxrs" rev="2.2.3" 
+      conf="*->default" />
+    <!--Configuration: test -->
+
+    <dependency org="org.apache.hadoop" name="hadoop-test" rev="1.2.0" conf="test->default">
+      <exclude org="net.sf.kosmosfs" name="kfs" />
+      <exclude org="net.java.dev.jets3t" name="jets3t" />
+      <exclude org="org.eclipse.jdt" name="core" />
+      <exclude org="org.mortbay.jetty" name="jsp-*" />
+    </dependency>
+
+	<dependency org="org.mockito" name="mockito-all" rev="1.9.5" conf="test->default"/>
+	<dependency org="org.springframework" name="spring-test" rev="4.0.4.RELEASE" conf="test->default"/>
+    
+    <dependency org="nekohtml" name="nekohtml" rev="0.9.5"/>
 
     <!--Configuration: test -->
 
@@ -94,16 +114,29 @@
     <dependency org="org.hsqldb" name="hsqldb" rev="2.2.8" conf="*->default" />
     <dependency org="org.jdom" name="jdom" rev="1.1" conf="test->default"/>
 
+    <!--================-->
+    <!-- Gora artifacts -->
+    <!--================-->
+    <!-- N.B. To use Gora SNAPSHOT's merely replace the 'ref' value with the SNAPSHOT version 
+    and add changing="true" alongside the dependency declaration. An example has been
+    provided for the gora-core dependency as below 
+    latest :0.5
+        <dependency org="org.apache.avro" name="avro" rev="1.4.1"/>
+    -->
+    <dependency org="org.apache.avro" name="avro" rev="1.4.1"/>
+    
     <dependency org="org.apache.gora" name="gora-sql" rev="0.1.1-incubating"
       conf="*->default" />
     
     <dependency org="org.apache.gora" name="gora-core" rev="0.2.1"
       conf="*->default" />
 
+    <!-- 
     <dependency org="org.restlet.jse" name="org.restlet" rev="2.0.5" conf="*->default" />
     <dependency org="org.restlet.jse" name="org.restlet.ext.jackson" rev="2.0.5" 
       conf="*->default" />
-
+    -->
+    
     <!-- Uncomment this to use MySQL as database with SQL as Gora store. -->
     <dependency org="mysql" name="mysql-connector-java" rev="5.1.18" conf="*->default"/> 
 

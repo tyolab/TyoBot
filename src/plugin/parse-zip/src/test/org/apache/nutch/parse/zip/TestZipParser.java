@@ -23,23 +23,22 @@ import org.apache.nutch.protocol.Content;
 import org.apache.nutch.protocol.ProtocolException;
 
 import org.apache.nutch.parse.Parse;
-import org.apache.nutch.parse.ParseImpl;
 import org.apache.nutch.parse.ParseUtil;
 import org.apache.nutch.parse.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.util.NutchConfiguration;
 
 import org.apache.hadoop.io.Text;
-import org.apache.nutch.crawl.CrawlDatum;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 /** 
  * Based on Unit tests for MSWordParser by John Xing
  *
  * @author Rohit Kulkarni & Ashish Vaidya
  */
-public class TestZipParser extends TestCase {
+public class TestZipParser {
 
   private String fileSeparator = System.getProperty("file.separator");
   // This system property is defined in ./src/plugin/build-plugin.xml
@@ -52,13 +51,13 @@ public class TestZipParser extends TestCase {
   private String expectedText = "textfile.txt This is text file number 1 ";
 
   public TestZipParser(String name) { 
-    super(name); 
   }
 
   protected void setUp() {}
 
   protected void tearDown() {}
 
+  @Test
   public void testIt() throws ProtocolException, ParseException {
     String urlString;
     Protocol protocol;

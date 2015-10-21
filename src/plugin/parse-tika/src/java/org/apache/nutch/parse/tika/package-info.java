@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,22 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.nutch.metadata;
 
 /**
- * A collection of Creative Commons properties names.
- * 
- * @see <a href="http://www.creativecommons.org/">creativecommons.org</a>
- * 
- * @author Chris Mattmann
- * @author J&eacute;r&ocirc;me Charron
+ * Parse various document formats with help of
+ * <a href="http://tika.apache.org/">Apache Tika</a>.
  */
-public interface CreativeCommons {
+package org.apache.nutch.parse.tika;
 
-  public final static String LICENSE_URL = "License-Url";
-
-  public final static String LICENSE_LOCATION = "License-Location";
-
-  public final static String WORK_TYPE = "Work-Type";
-
-}

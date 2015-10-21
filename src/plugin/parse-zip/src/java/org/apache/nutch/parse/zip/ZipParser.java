@@ -29,10 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.net.protocols.Response;
 import org.apache.nutch.parse.Outlink;
-import org.apache.nutch.parse.ParseData;
-import org.apache.nutch.parse.ParseImpl;
-import org.apache.nutch.parse.ParseResult;
-import org.apache.nutch.parse.ParseStatus;
 import org.apache.nutch.parse.Parser;
 import org.apache.nutch.protocol.Content;
 import org.apache.hadoop.conf.Configuration;
@@ -73,7 +69,7 @@ public class ZipParser implements Parser {
         return new ParseStatus(ParseStatus.FAILED,
             ParseStatus.FAILED_TRUNCATED, "Content truncated at "
                 + contentInBytes.length
-                + " bytes. Parser can't handle incomplete pdf file.")
+                + " bytes. Parser can't handle incomplete zip file.")
             .getEmptyParseResult(content.getUrl(), getConf());
       }
 

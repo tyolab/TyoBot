@@ -54,29 +54,39 @@ import org.apache.nutch.util.Bytes;
 import org.apache.nutch.util.EncodingDetector;
 import org.apache.nutch.util.NutchConfiguration;
 import org.apache.nutch.util.TableUtil;
-import org.cyberneko.html.parsers.DOMFragmentParser;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.DocumentFragment;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class HtmlParser implements Parser {
-  public static final Logger LOG = LoggerFactory.getLogger("org.apache.nutch.parse.html");
+/* 
+ * the nekohtml parser is optional but the problems are in the compilation
+ * nekohtml doesn't come with nutch
+ * 
+ * so added nekohtml parser dependency in ivy
+ * 
+ */
+import org.cyberneko.html.parsers.DOMFragmentParser;
 
-  // I used 1000 bytes at first, but  found that some documents have
+public class HtmlParser implements Parser {
+  public static final Logger LOG = LoggerFactory
+      .getLogger("org.apache.nutch.parse.html");
+
+  // I used 1000 bytes at first, but found that some documents have
   // meta tag well past the first 1000 bytes.
   // (e.g. http://cn.promo.yahoo.com/customcare/music.html)
   private static final int CHUNK_SIZE = 2000;
 
   // NUTCH-1006 Meta equiv with single quotes not accepted
-  private static Pattern metaPattern =
-    Pattern.compile("<meta\\s+([^>]*http-equiv=(\"|')?content-type(\"|')?[^>]*)>",
-        Pattern.CASE_INSENSITIVE);
-  private static Pattern charsetPattern =
-    Pattern.compile("charset=\\s*([a-z][_\\-0-9a-z]*)",
-        Pattern.CASE_INSENSITIVE);
+  private static Pattern metaPattern = Pattern.compile(
+      "<meta\\s+([^>]*http-equiv=(\"|')?content-type(\"|')?[^>]*)>",
+      Pattern.CASE_INSENSITIVE);
+  private static Pattern charsetPattern = Pattern.compile(
+      "charset=\\s*([a-z][_\\-0-9a-z]*)", Pattern.CASE_INSENSITIVE);
 
-  private static Collection<WebPage.Field> FIELDS = new HashSet<WebPage.Field>();
+  private static Collection<WebPage.Field> FIELDS =
+      new HashSet<WebPage.Field>();
 
   static {
     FIELDS.add(WebPage.Field.BASE_URL);
@@ -86,23 +96,20 @@ public class HtmlParser implements Parser {
 
   /**
    * Given a <code>byte[]</code> representing an html file of an
-   * <em>unknown</em> encoding,  read out 'charset' parameter in the meta tag
-   * from the first <code>CHUNK_SIZE</code> bytes.
-   * If there's no meta tag for Content-Type or no charset is specified,
-   * <code>null</code> is returned.  <br />
-   * FIXME: non-byte oriented character encodings (UTF-16, UTF-32)
-   * can't be handled with this.
-   * We need to do something similar to what's done by mozilla
-   * (http://lxr.mozilla.org/seamonkey/source/parser/htmlparser/src/nsParser.cpp#1993).
-   * See also http://www.w3.org/TR/REC-xml/#sec-guessing
-   * <br />
+   * <em>unknown</em> encoding, read out 'charset' parameter in the meta tag
+   * from the first <code>CHUNK_SIZE</code> bytes. If there's no meta tag for
+   * Content-Type or no charset is specified, <code>null</code> is returned. <br />
+   * FIXME: non-byte oriented character encodings (UTF-16, UTF-32) can't be
+   * handled with this. We need to do something similar to what's done by
+   * mozilla
+   * (http://lxr.mozilla.org/seamonkey/source/parser/htmlparser/src/nsParser
+   * .cpp#1993). See also http://www.w3.org/TR/REC-xml/#sec-guessing <br />
    *
    * @param content <code>byte[]</code> representation of an html file
    */
 
   private static String sniffCharacterEncoding(byte[] content) {
-    int length = content.length < CHUNK_SIZE ?
-        content.length : CHUNK_SIZE;
+    int length = content.length < CHUNK_SIZE ? content.length : CHUNK_SIZE;
 
     // We don't care about non-ASCII parts so that it's sufficient
     // to just inflate each byte to a 16-bit value by padding.
@@ -110,8 +117,7 @@ public class HtmlParser implements Parser {
     // {U+0041, U+0082, U+00B7}.
     String str = "";
     try {
-      str = new String(content, 0, length,
-          Charset.forName("ASCII").toString());
+      str = new String(content, 0, length, Charset.forName("ASCII").toString());
     } catch (UnsupportedEncodingException e) {
       // code should never come here, but just in case...
       return null;
@@ -158,7 +164,8 @@ public class HtmlParser implements Parser {
     DocumentFragment root;
     try {
       byte[] contentInOctets = page.getContent().array();
-      InputSource input = new InputSource(new ByteArrayInputStream(contentInOctets));
+      InputSource input =
+          new InputSource(new ByteArrayInputStream(contentInOctets));
 
       EncodingDetector detector = new EncodingDetector(conf);
       detector.autoDetectClues(page, true);
@@ -169,7 +176,9 @@ public class HtmlParser implements Parser {
       metadata.set(Metadata.CHAR_ENCODING_FOR_CONVERSION, encoding);
 
       input.setEncoding(encoding);
-      if (LOG.isTraceEnabled()) { LOG.trace("Parsing..."); }
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Parsing...");
+      }
       root = parse(input);
     } catch (IOException e) {
       LOG.error("Failed with the following IOException: ", e);
@@ -191,25 +200,31 @@ public class HtmlParser implements Parser {
       LOG.trace("Meta tags for " + base + ": " + metaTags.toString());
     }
     // check meta directives
-    if (!metaTags.getNoIndex()) {               // okay to index
+    if (!metaTags.getNoIndex()) { // okay to index
       StringBuilder sb = new StringBuilder();
-      if (LOG.isTraceEnabled()) { LOG.trace("Getting text..."); }
-      utils.getText(sb, root);          // extract text
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Getting text...");
+      }
+      utils.getText(sb, root); // extract text
       text = sb.toString();
       sb.setLength(0);
-      if (LOG.isTraceEnabled()) { LOG.trace("Getting title..."); }
-      utils.getTitle(sb, root);         // extract title
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Getting title...");
+      }
+      utils.getTitle(sb, root); // extract title
       title = sb.toString().trim();
     }
 
-    if (!metaTags.getNoFollow()) {              // okay to follow links
-      ArrayList<Outlink> l = new ArrayList<Outlink>();   // extract outlinks
+    if (!metaTags.getNoFollow()) { // okay to follow links
+      ArrayList<Outlink> l = new ArrayList<Outlink>(); // extract outlinks
       URL baseTag = utils.getBase(root);
-      if (LOG.isTraceEnabled()) { LOG.trace("Getting links..."); }
-      utils.getOutlinks(baseTag!=null?baseTag:base, l, root);
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Getting links...");
+      }
+      utils.getOutlinks(baseTag != null ? baseTag : base, l, root);
       outlinks = l.toArray(new Outlink[l.size()]);
       if (LOG.isTraceEnabled()) {
-        LOG.trace("found "+outlinks.length+" outlinks in "+ url);
+        LOG.trace("found " + outlinks.length + " outlinks in " + url);
       }
     }
 
@@ -224,7 +239,7 @@ public class HtmlParser implements Parser {
     Parse parse = new Parse(text, title, outlinks, status);
     parse = htmlParseFilters.filter(url, page, parse, metaTags, root);
 
-    if (metaTags.getNoCache()) {             // not okay to cache
+    if (metaTags.getNoCache()) { // not okay to cache
       page.putToMetadata(new Utf8(Nutch.CACHING_FORBIDDEN_KEY),
           ByteBuffer.wrap(Bytes.toBytes(cachingPolicy)));
     }
@@ -235,7 +250,8 @@ public class HtmlParser implements Parser {
   private DocumentFragment parse(InputSource input) throws Exception {
     if (parserImpl.equalsIgnoreCase("tagsoup"))
       return parseTagSoup(input);
-    else return parseNeko(input);
+    else
+      return parseNeko(input);
   }
 
   private DocumentFragment parseTagSoup(InputSource input) throws Exception {
@@ -246,7 +262,8 @@ public class HtmlParser implements Parser {
     reader.setContentHandler(builder);
     reader.setFeature(org.ccil.cowan.tagsoup.Parser.ignoreBogonsFeature, true);
     reader.setFeature(org.ccil.cowan.tagsoup.Parser.bogonsEmptyFeature, false);
-    reader.setProperty("http://xml.org/sax/properties/lexical-handler", builder);
+    reader
+        .setProperty("http://xml.org/sax/properties/lexical-handler", builder);
     reader.parse(input);
     return frag;
   }
@@ -256,17 +273,24 @@ public class HtmlParser implements Parser {
     try {
       parser.setFeature("http://cyberneko.org/html/features/augmentations",
           true);
-      parser.setProperty("http://cyberneko.org/html/properties/default-encoding",
+      parser.setProperty(
+          "http://cyberneko.org/html/properties/default-encoding",
           defaultCharEncoding);
-      parser.setFeature("http://cyberneko.org/html/features/scanner/ignore-specified-charset",
-          true);
-      parser.setFeature("http://cyberneko.org/html/features/balance-tags/ignore-outside-content",
-          false);
-      parser.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment",
+      parser
+          .setFeature(
+              "http://cyberneko.org/html/features/scanner/ignore-specified-charset",
+              true);
+      parser
+          .setFeature(
+              "http://cyberneko.org/html/features/balance-tags/ignore-outside-content",
+              false);
+      parser.setFeature(
+          "http://cyberneko.org/html/features/balance-tags/document-fragment",
           true);
       parser.setFeature("http://cyberneko.org/html/features/report-errors",
           LOG.isTraceEnabled());
-    } catch (SAXException e) {}
+    } catch (SAXException e) {
+    }
     // convert Document to DocumentFragment
     HTMLDocumentImpl doc = new HTMLDocumentImpl();
     doc.setErrorChecking(false);
@@ -276,18 +300,21 @@ public class HtmlParser implements Parser {
     res.appendChild(frag);
 
     try {
-      while(true) {
+      while (true) {
         frag = doc.createDocumentFragment();
         parser.parse(input, frag);
-        if (!frag.hasChildNodes()) break;
+        if (!frag.hasChildNodes())
+          break;
         if (LOG.isInfoEnabled()) {
-          LOG.info(" - new frag, " + frag.getChildNodes().getLength() + " nodes.");
+          LOG.info(" - new frag, " + frag.getChildNodes().getLength()
+              + " nodes.");
         }
         res.appendChild(frag);
       }
-    } catch (Exception x) { 
+    } catch (Exception x) {
       LOG.error("Failed with the following Exception: ", x);
-      };
+    }
+    ;
     return res;
   }
 
@@ -295,11 +322,12 @@ public class HtmlParser implements Parser {
     this.conf = conf;
     this.htmlParseFilters = new ParseFilters(getConf());
     this.parserImpl = getConf().get("parser.html.impl", "neko");
-    this.defaultCharEncoding = getConf().get(
-        "parser.character.encoding.default", "windows-1252");
+    this.defaultCharEncoding =
+        getConf().get("parser.character.encoding.default", "windows-1252");
     this.utils = new DOMContentUtils(conf);
-    this.cachingPolicy = getConf().get("parser.caching.forbidden.policy",
-        Nutch.CACHING_FORBIDDEN_CONTENT);
+    this.cachingPolicy =
+        getConf().get("parser.caching.forbidden.policy",
+            Nutch.CACHING_FORBIDDEN_CONTENT);
   }
 
   public Configuration getConf() {
@@ -312,11 +340,11 @@ public class HtmlParser implements Parser {
   }
 
   public static void main(String[] args) throws Exception {
-    //LOG.setLevel(Level.FINE);
+    // LOG.setLevel(Level.FINE);
     String name = args[0];
-    String url = "file:"+name;
+    String url = "file:" + name;
     File file = new File(name);
-    byte[] bytes = new byte[(int)file.length()];
+    byte[] bytes = new byte[(int) file.length()];
     DataInputStream in = new DataInputStream(new FileInputStream(file));
     in.readFully(bytes);
     Configuration conf = NutchConfiguration.create();
@@ -327,8 +355,8 @@ public class HtmlParser implements Parser {
     page.setContent(ByteBuffer.wrap(bytes));
     page.setContentType(new Utf8("text/html"));
     Parse parse = parser.getParse(url, page);
-    System.out.println("title: "+parse.getTitle());
-    System.out.println("text: "+parse.getText());
+    System.out.println("title: " + parse.getTitle());
+    System.out.println("text: " + parse.getText());
     System.out.println("outlinks: " + Arrays.toString(parse.getOutlinks()));
 
   }

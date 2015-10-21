@@ -52,20 +52,20 @@ public class TestSpellCheckedMetadata extends TestCase {
 
   /** Test for the <code>getNormalizedName(String)</code> method. */
   public void testGetNormalizedName() {
-    assertEquals("Content-Type", SpellCheckedMetadata
-        .getNormalizedName("Content-Type"));
-    assertEquals("Content-Type", SpellCheckedMetadata
-        .getNormalizedName("ContentType"));
-    assertEquals("Content-Type", SpellCheckedMetadata
-        .getNormalizedName("Content-type"));
-    assertEquals("Content-Type", SpellCheckedMetadata
-        .getNormalizedName("contenttype"));
-    assertEquals("Content-Type", SpellCheckedMetadata
-        .getNormalizedName("contentype"));
-    assertEquals("Content-Type", SpellCheckedMetadata
-        .getNormalizedName("contntype"));
+    assertEquals("Content-Type",
+        SpellCheckedMetadata.getNormalizedName("Content-Type"));
+    assertEquals("Content-Type",
+        SpellCheckedMetadata.getNormalizedName("ContentType"));
+    assertEquals("Content-Type",
+        SpellCheckedMetadata.getNormalizedName("Content-type"));
+    assertEquals("Content-Type",
+        SpellCheckedMetadata.getNormalizedName("contenttype"));
+    assertEquals("Content-Type",
+        SpellCheckedMetadata.getNormalizedName("contentype"));
+    assertEquals("Content-Type",
+        SpellCheckedMetadata.getNormalizedName("contntype"));
   }
-  
+
   /** Test for the <code>add(String, String)</code> method. */
   public void testAdd() {
     String[] values = null;
@@ -256,8 +256,8 @@ public class TestSpellCheckedMetadata extends TestCase {
   }
 
   /**
-   * IO Test method, usable only when you plan to do changes in metadata
-   * to measure relative performance impact.
+   * IO Test method, usable only when you plan to do changes in metadata to
+   * measure relative performance impact.
    */
   public final void testHandlingSpeed() {
     SpellCheckedMetadata result;
@@ -296,7 +296,7 @@ public class TestSpellCheckedMetadata extends TestCase {
     scmd.add("Accept-Ranges", "bytes");
     scmd.add("ETag", "\"1234567-89-01234567\"");
     scmd.add("Content-Length", "123");
-    scmd.add(Nutch.SEGMENT_NAME_KEY, "segmentzzz");
+    // scmd.add(Nutch.SEGMENT_NAME_KEY, "segmentzzz");
     scmd.add(Nutch.SIGNATURE_KEY, "123");
     return scmd;
   }
