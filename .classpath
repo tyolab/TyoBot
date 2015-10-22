@@ -218,5 +218,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/atire_jni"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AtireJ"/>
 	<classpathentry kind="lib" path="lib/avro-1.3.3.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Search4MLib"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

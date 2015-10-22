@@ -27,6 +27,9 @@ import org.apache.nutch.util.TableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import au.com.tyo.search.search4m.Search4MIndexer;
+import au.com.tyo.search.search4m.Search4MService;
+
 public class AtireWriter implements NutchIndexWriter {
 
   public static Logger LOG = LoggerFactory.getLogger(AtireWriter.class);
@@ -49,6 +52,10 @@ public class AtireWriter implements NutchIndexWriter {
   private long indexedDocs = 0;
   private int bulkDocs = 0;
   private int bulkLength = 0;
+  
+  Search4MService service;
+  
+  Search4MIndexer indexer;
 
   @Override
   public void write(NutchDocument doc) throws IOException {
@@ -70,7 +77,7 @@ public class AtireWriter implements NutchIndexWriter {
     
     for (String fieldName : doc.getFieldNames()) {
       if (fieldName.equals("site")) {
-        page.setSite(doc.getFieldValue(fieldName));
+        page.setSite(TableUtil.reverseHost(doc.getFieldValue(fieldName)));
       } else if (fieldName.equals("title")) {
         page.setTitle(doc.getFieldValue(fieldName));
       } else if (fieldName.equals("id")) {
@@ -82,16 +89,16 @@ public class AtireWriter implements NutchIndexWriter {
       } else if (fieldName.equals("text")) {
         page.setText(doc.getFieldValue(fieldName));
       }
-      if (doc.getFieldValues(fieldName).size() > 1) {
-        source.put(fieldName, doc.getFieldValues(fieldName));
-        // Loop through the values to keep track of the size of this document
-        for (String value : doc.getFieldValues(fieldName)) {
-          bulkLength += value.length();
-        }
-      } else {
-        source.put(fieldName, doc.getFieldValue(fieldName));
-        bulkLength += doc.getFieldValue(fieldName).length();
-      }
+//      if (doc.getFieldValues(fieldName).size() > 1) {
+//        source.put(fieldName, doc.getFieldValues(fieldName));
+//        // Loop through the values to keep track of the size of this document
+//        for (String value : doc.getFieldValues(fieldName)) {
+//          bulkLength += value.length();
+//        }
+//      } else {
+//        source.put(fieldName, doc.getFieldValue(fieldName));
+//        bulkLength += doc.getFieldValue(fieldName).length();
+//      }
     }
     // request.setSource(source);
 
@@ -108,6 +115,8 @@ public class AtireWriter implements NutchIndexWriter {
 //      // processExecute(true);
 //
 //    }
+    
+    indexer.index(Long.toString(page.getId()), page.toXml());
   }
 
   @Override
@@ -115,7 +124,11 @@ public class AtireWriter implements NutchIndexWriter {
     // Flush pending requests
     LOG.info("Processing remaining requests [docs = " + bulkDocs
         + ", length = " + bulkLength + ", total docs = " + indexedDocs + "]");
-
+    indexer.finish();
+    
+    indexer.destroy();
+    
+    service.setIndexer(null);
   }
 
   @Override
@@ -127,6 +140,13 @@ public class AtireWriter implements NutchIndexWriter {
     maxBulkLength =
         job.getConfiguration().getInt(AtireConstants.MAX_BULK_LENGTH,
             DEFAULT_MAX_BULK_LENGTH);
+    
+    service = new Search4MService();
+    
+    indexer = service.createIndexer();
+
+    indexer.initialize("index.db", "SITE:KEYWORDS");
+
   }
 
   // public static String stripNonCharCodepoints(String input) {

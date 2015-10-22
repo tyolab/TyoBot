@@ -46,6 +46,8 @@ public class AtireIndexerJob extends IndexerJob {
   static {
     LOG = LoggerFactory.getLogger(AtireIndexerJob.class);
     IndexerJob.indexerMapperCls = AtireMapper.class;
+    
+    System.loadLibrary("atire_jni");
   }
 
   public static class AtireMapper extends IndexerMapper {

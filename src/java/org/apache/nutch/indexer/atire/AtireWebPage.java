@@ -69,7 +69,7 @@ public class AtireWebPage extends AtireDocument {
   public String toXml() {
 //  StringBuffer sb = new StringBuffer();
 
-  String text = String.format("<%s>%</%s>", CONTENT_TAG, null != this.getText() ? this.getText() : "", CONTENT_TAG);
+  String text = String.format("<%s>%s</%s>", CONTENT_TAG, null != this.getText() ? this.getText() : "", CONTENT_TAG);
   
   
   return String.format(XML_TEMPLATE, this.getTitle(), String.valueOf(this.getId()), this.getSite(), 
