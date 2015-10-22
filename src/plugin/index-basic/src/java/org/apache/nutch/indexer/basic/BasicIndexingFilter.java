@@ -136,6 +136,12 @@ public class BasicIndexingFilter implements IndexingFilter {
         DateUtil.getThreadLocalDateFormat().format(
             new Date(page.getFetchTime()));
     doc.add("tstamp", tstamp);
+    
+    // thumbnail url
+    if (page.isReadable(WebPage.Field.THUMB_URL.getIndex())) {
+      String thumbUrl = TableUtil.toString(page.getThumbUrl());
+      doc.add("thumbnail_url", thumbUrl);
+    }
 
     return doc;
   }

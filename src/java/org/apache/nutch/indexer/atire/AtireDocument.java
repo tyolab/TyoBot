@@ -19,13 +19,25 @@ public abstract class AtireDocument {
       // + ""
       // + ""
       + "</doc>\n";
+  
+  protected static String JSON_DOC_TEMPLATE = "{"
+      + "\"id\": %d,"
+      + "\"title\": \"%s\","
+      + "\"thumbnail_url\": \"%s\","
+      + "\"url\": \"%s\","
+      + "\"desc\": \"%s\""
+      + "}\n";
 
   protected static String CONTENT_TAG = "text";
+  
+  protected String docToStore;
 
   public static void setContentTag(String tag) {
     CONTENT_TAG = tag;
   }
   
   public abstract String toXml();
+  
+  public abstract String toJSON();
 
 }

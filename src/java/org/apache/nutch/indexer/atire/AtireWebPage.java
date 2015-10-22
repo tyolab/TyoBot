@@ -14,8 +14,12 @@ public class AtireWebPage extends AtireDocument {
   
   private String text;
   
+  private String url;
+  
+  private String thumbnailUrl;
+  
   public AtireWebPage() {
-    
+    thumbnailUrl = null;
   }
 
   public long getId() {
@@ -66,6 +70,22 @@ public class AtireWebPage extends AtireDocument {
     this.text = text;
   }
   
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
+  }
+
+  public String getThumbnailUrl() {
+    return thumbnailUrl;
+  }
+
+  public void setThumbnailUrl(String thumbnailUrl) {
+    this.thumbnailUrl = thumbnailUrl;
+  }
+
   public String toXml() {
 //  StringBuffer sb = new StringBuffer();
 
@@ -75,4 +95,10 @@ public class AtireWebPage extends AtireDocument {
   return String.format(XML_TEMPLATE, this.getTitle(), String.valueOf(this.getId()), this.getSite(), 
       this.getDesc(), this.getKeywords(), text);
 }
+
+  @Override
+  public String toJSON() {
+    return String.format(JSON_DOC_TEMPLATE, this.getId(), this.getTitle(), this.getThumbnailUrl(), this.getUrl(), 
+        this.getDesc());
+  }
 }

@@ -88,6 +88,10 @@ public class AtireWriter implements NutchIndexWriter {
         page.setDesc(doc.getFieldValue(fieldName));
       } else if (fieldName.equals("text")) {
         page.setText(doc.getFieldValue(fieldName));
+      } else if (fieldName.equals("url")) {
+        page.setUrl(doc.getFieldValue(fieldName));
+      } else if (fieldName.equals("thumbnail_url")) {
+        page.setThumbnailUrl(doc.getFieldValue(fieldName));
       }
 //      if (doc.getFieldValues(fieldName).size() > 1) {
 //        source.put(fieldName, doc.getFieldValues(fieldName));
@@ -102,21 +106,23 @@ public class AtireWriter implements NutchIndexWriter {
     }
     // request.setSource(source);
 
+    if (null != page.getThumbnailUrl()) {
     // Add this indexing request to a bulk request
     // bulk.add(request);
-    indexedDocs++;
-    bulkDocs++;
-
-//    if (bulkDocs >= maxBulkDocs || bulkLength >= maxBulkLength) {
-//      LOG.info("Processing bulk request [docs = " + bulkDocs + ", length = "
-//          + bulkLength + ", total docs = " + indexedDocs
-//          + ", last doc in bulk = '" + id + "']");
-//      // Flush the bulk of indexing requests
-//      // processExecute(true);
-//
-//    }
-    
-    indexer.index(Long.toString(page.getId()), page.toXml());
+      indexedDocs++;
+      bulkDocs++;
+  
+  //    if (bulkDocs >= maxBulkDocs || bulkLength >= maxBulkLength) {
+  //      LOG.info("Processing bulk request [docs = " + bulkDocs + ", length = "
+  //          + bulkLength + ", total docs = " + indexedDocs
+  //          + ", last doc in bulk = '" + id + "']");
+  //      // Flush the bulk of indexing requests
+  //      // processExecute(true);
+  //
+  //    }
+      
+      indexer.index(Long.toString(page.getId()), page.toXml(), page.toJSON());
+    }
   }
 
   @Override
@@ -145,7 +151,7 @@ public class AtireWriter implements NutchIndexWriter {
     
     indexer = service.createIndexer();
 
-    indexer.initialize("index.db", "SITE:KEYWORDS");
+    indexer.initialize("index.db", "SITE:KEYWORDS", "-Cz");
 
   }
 
