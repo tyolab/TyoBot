@@ -61,6 +61,7 @@ public class BasicIndexingFilter implements IndexingFilter {
     FIELDS.add(WebPage.Field.TITLE);
     FIELDS.add(WebPage.Field.TEXT);
     FIELDS.add(WebPage.Field.FETCH_TIME);
+    FIELDS.add(WebPage.Field.THUMB_URL);
   }
 
   /**

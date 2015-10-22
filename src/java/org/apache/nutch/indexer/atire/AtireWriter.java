@@ -62,17 +62,25 @@ public class AtireWriter implements NutchIndexWriter {
     Map<String, Object> source = new HashMap<String, Object>();
 
     // Loop through all fields of this doc
+    /*
+     * S: site MK: meta keywords MD: meta description T: title word TF: title
+     * full
+     */
+    AtireWebPage page = new AtireWebPage();
+    
     for (String fieldName : doc.getFieldNames()) {
       if (fieldName.equals("site")) {
-
+        page.setSite(doc.getFieldValue(fieldName));
       } else if (fieldName.equals("title")) {
-
+        page.setTitle(doc.getFieldValue(fieldName));
       } else if (fieldName.equals("id")) {
-
-      } else if (fieldName.equals("")) {
-
-      } else if (fieldName.equals("")) {
-
+        page.setId(indexedDocs);
+      } else if (fieldName.equals("meta_keywords")) {
+        page.setKeywords(doc.getFieldValue(fieldName));
+      } else if (fieldName.equals("meta_description")) {
+        page.setDesc(doc.getFieldValue(fieldName));
+      } else if (fieldName.equals("text")) {
+        page.setText(doc.getFieldValue(fieldName));
       }
       if (doc.getFieldValues(fieldName).size() > 1) {
         source.put(fieldName, doc.getFieldValues(fieldName));
@@ -92,14 +100,14 @@ public class AtireWriter implements NutchIndexWriter {
     indexedDocs++;
     bulkDocs++;
 
-    if (bulkDocs >= maxBulkDocs || bulkLength >= maxBulkLength) {
-      LOG.info("Processing bulk request [docs = " + bulkDocs + ", length = "
-          + bulkLength + ", total docs = " + indexedDocs
-          + ", last doc in bulk = '" + id + "']");
-      // Flush the bulk of indexing requests
-      // processExecute(true);
-
-    }
+//    if (bulkDocs >= maxBulkDocs || bulkLength >= maxBulkLength) {
+//      LOG.info("Processing bulk request [docs = " + bulkDocs + ", length = "
+//          + bulkLength + ", total docs = " + indexedDocs
+//          + ", last doc in bulk = '" + id + "']");
+//      // Flush the bulk of indexing requests
+//      // processExecute(true);
+//
+//    }
   }
 
   @Override

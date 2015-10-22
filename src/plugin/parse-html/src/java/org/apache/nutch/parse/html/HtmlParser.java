@@ -54,7 +54,6 @@ import org.apache.nutch.util.Bytes;
 import org.apache.nutch.util.EncodingDetector;
 import org.apache.nutch.util.NutchConfiguration;
 import org.apache.nutch.util.TableUtil;
-
 import org.w3c.dom.DOMException;
 import org.w3c.dom.DocumentFragment;
 import org.xml.sax.InputSource;
@@ -242,6 +241,13 @@ public class HtmlParser implements Parser {
     if (metaTags.getNoCache()) { // not okay to cache
       page.putToMetadata(new Utf8(Nutch.CACHING_FORBIDDEN_KEY),
           ByteBuffer.wrap(Bytes.toBytes(cachingPolicy)));
+    }
+
+    Metadata generalTags = metaTags.getGeneralTags();
+    String[] names = generalTags.names();
+    for (String name : names) {
+      page.putToMetadata(new Utf8("meta_" + name),
+          ByteBuffer.wrap(Bytes.toBytes(generalTags.get(name))));
     }
 
     return parse;

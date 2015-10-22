@@ -61,6 +61,8 @@ public class HTMLMetaProcessor {
         Node nameNode = null;
         Node equivNode = null;
         Node contentNode = null;
+        Node descNode = null;
+        Node keywordsNode = null;
         // Retrieves name, http-equiv and content attribues
         for (int i = 0; i < attrs.getLength(); i++) {
           Node attr = attrs.item(i);
@@ -71,13 +73,26 @@ public class HTMLMetaProcessor {
             equivNode = attr;
           } else if (attrName.equals("content")) {
             contentNode = attr;
-          }
+          } /*
+             * else if (attrName.equals("description")) { descNode = attr; }
+             * else if (attrName.equals("keywords")) { keywordsNode = attr; }
+             */
         }
+
+        /* keywords and description are in the general tags */
+        // if (keywordsNode != null) {
+        //
+        // }
+        //
+        // if (descNode != null) {
+        //
+        // }
 
         if (nameNode != null) {
           if (contentNode != null) {
             String name = nameNode.getNodeValue().toLowerCase();
-            metaTags.getGeneralTags().add(name, contentNode.getNodeValue());
+            String value = contentNode.getNodeValue();
+            metaTags.getGeneralTags().add(name, value);
             if ("robots".equals(name)) {
 
               if (contentNode != null) {

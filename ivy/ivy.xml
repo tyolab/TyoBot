@@ -122,8 +122,31 @@
     provided for the gora-core dependency as below 
     latest :0.5
         <dependency org="org.apache.avro" name="avro" rev="1.4.1"/>
+        
+        java.lang.AbstractMethodError: Method org/apache/gora/persistency/ListGenericArray.add(Ljava/lang/Object;)Z is abstract
+		at org.apache.gora.persistency.ListGenericArray.add(ListGenericArray.java)
+		at org.apache.avro.generic.GenericDatumReader.addToArray(GenericDatumReader.java:216)
+		at org.apache.avro.generic.GenericDatumReader.readArray(GenericDatumReader.java:192)
+		at org.apache.avro.generic.GenericDatumReader.read(GenericDatumReader.java:116)
+		at org.apache.gora.avro.PersistentDatumReader.readRecord(PersistentDatumReader.java:160)
+		at org.apache.avro.generic.GenericDatumReader.read(GenericDatumReader.java:114)
+		at org.apache.gora.avro.PersistentDatumReader.read(PersistentDatumReader.java:102)
+		at org.apache.gora.util.IOUtils.deserialize(IOUtils.java:259)
+		at org.apache.gora.sql.store.SqlStore.readField(SqlStore.java:594)
+		at org.apache.gora.sql.store.SqlStore.readObject(SqlStore.java:535)
+		at org.apache.gora.sql.query.SqlResult.nextInner(SqlResult.java:54)
+		at org.apache.gora.query.impl.ResultBase.next(ResultBase.java:112)
+		at org.apache.gora.mapreduce.GoraRecordReader.nextKeyValue(GoraRecordReader.java:111)
+		at org.apache.hadoop.mapred.MapTask$NewTrackingRecordReader.nextKeyValue(MapTask.java:532)
+		at org.apache.hadoop.mapreduce.MapContext.nextKeyValue(MapContext.java:67)
+		at org.apache.hadoop.mapreduce.Mapper.run(Mapper.java:143)
+		at org.apache.hadoop.mapred.MapTask.runNewMapper(MapTask.java:764)
+		at org.apache.hadoop.mapred.MapTask.run(MapTask.java:370)
+		at org.apache.hadoop.mapred.LocalJobRunner$Job.run(LocalJobRunner.java:212)
+        
+        <dependency org="org.apache.avro" name="avro" rev="1.3.3"/>
+        1.3.3 doesn't exist in Maven repo    
     -->
-    <dependency org="org.apache.avro" name="avro" rev="1.4.1"/>
     
     <dependency org="org.apache.gora" name="gora-sql" rev="0.1.1-incubating"
       conf="*->default" />
