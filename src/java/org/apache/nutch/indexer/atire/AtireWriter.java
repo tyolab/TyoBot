@@ -77,7 +77,9 @@ public class AtireWriter implements NutchIndexWriter {
     
     for (String fieldName : doc.getFieldNames()) {
       if (fieldName.equals("site")) {
-        page.setSite(TableUtil.reverseHost(doc.getFieldValue(fieldName)));
+        // as in Atire, the dot will be considered as punctuation, it will break words
+        // so we just remove all dots
+        page.setSite(TableUtil.reverseHost(doc.getFieldValue(fieldName)).replace(".", ""));
       } else if (fieldName.equals("title")) {
         page.setTitle(doc.getFieldValue(fieldName));
       } else if (fieldName.equals("id")) {
@@ -151,7 +153,7 @@ public class AtireWriter implements NutchIndexWriter {
     
     indexer = service.createIndexer();
 
-    indexer.initialize("index.db", "SITE:KEYWORDS", "-Cz");
+    indexer.initialize("index.db", "SITE:KEYWORDS", "-Cz -rtrec:tag:DOC:TITLE");
 
   }
 
