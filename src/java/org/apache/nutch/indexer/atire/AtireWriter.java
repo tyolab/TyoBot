@@ -17,6 +17,7 @@
 package org.apache.nutch.indexer.atire;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,7 +80,21 @@ public class AtireWriter implements NutchIndexWriter {
       if (fieldName.equals("site")) {
         // as in Atire, the dot will be considered as punctuation, it will break words
         // so we just remove all dots
-        page.setSite(TableUtil.reverseHost(doc.getFieldValue(fieldName)).replace(".", ""));
+        String site = TableUtil.reverseHost(doc.getFieldValue(fieldName));
+        String[] sa = site.split("\\.");
+        ArrayList<String> dsa = new ArrayList<String>();
+        StringBuffer sb = new StringBuffer();
+        for (String s : sa) {
+          sb.append(s);
+          dsa.add(sb.toString());
+        }
+        sb.setLength(0);
+        for (int i = 0; i < dsa.size(); ++i) {
+          if (i > 0)
+            sb.append(" ");
+          sb.append(dsa.get(i));
+        }
+        page.setSite(sb.toString());
       } else if (fieldName.equals("title")) {
         page.setTitle(doc.getFieldValue(fieldName));
       } else if (fieldName.equals("id")) {

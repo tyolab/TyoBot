@@ -119,10 +119,6 @@ public class FetcherJob extends NutchTool implements Tool {
       try {
         Utf8 mark = Mark.GENERATE_MARK.checkMark(page);
 
-        if (key
-            .equals("com.youjizz.www:http/videos/italian-mother-knows-what-to-do-2183715.html"))
-          LOG.debug("I want to debug this batch id");
-
         if (null != mark) {
           String batch = mark.toString();
           if (!instance.uniqBatches.contains(batch))
@@ -332,7 +328,7 @@ public class FetcherJob extends NutchTool implements Tool {
     instance = this;
 
     int threads = -1;
-    boolean shouldResume = false;
+    boolean shouldResume = true;  // always should start from where was stopped
     String batchId;
 
     String usage =
@@ -341,7 +337,7 @@ public class FetcherJob extends NutchTool implements Tool {
             + "    <batchId>     - crawl identifier returned by Generator, or -all for all \n \t \t    generated batchId-s\n"
             + "    -crawlId <id> - the id to prefix the schemas to operate on, \n \t \t    (default: storage.crawl.id)\n"
             + "    -threads N    - number of fetching threads per task\n"
-            + "    -resume       - resume interrupted job\n"
+            + "    -noresume     - don't resume interrupted job\n"
             + "    -numTasks N   - if N > 0 then use this many reduce tasks for fetching \n \t \t    (default: mapred.map.tasks)";
 
     if (args.length == 0) {
@@ -359,8 +355,8 @@ public class FetcherJob extends NutchTool implements Tool {
       if ("-threads".equals(args[i])) {
         // found -threads option
         threads = Integer.parseInt(args[++i]);
-      } else if ("-resume".equals(args[i])) {
-        shouldResume = true;
+      } else if ("-noresume".equals(args[i])) {
+        shouldResume = false;
       } else if ("-numTasks".equals(args[i])) {
         numTasks = Integer.parseInt(args[++i]);
       } else if ("-crawlId".equals(args[i])) {
