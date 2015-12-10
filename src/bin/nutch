@@ -106,7 +106,7 @@ if $cygwin; then
 fi
 
 JAVA=$JAVA_HOME/bin/java
-JAVA_HEAP_MAX=-Xmx1000m 
+JAVA_HEAP_MAX=-Xmx5000m 
 
 # check envvars which might override default args
 if [ "$NUTCH_HEAPSIZE" != "" ]; then

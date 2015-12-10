@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.sql.BatchUpdateException;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -331,8 +332,13 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
         try {
           stmt.executeBatch();
         } catch (SQLException ex) {
-          deferred = ex;
-          break;
+          if (ex instanceof BatchUpdateException && ex.getMessage().contains("Incorrect string value")) {
+            ; // do nothing
+          } 
+          else {
+            deferred = ex;
+            break;
+          }
         }
       }
       for (PreparedStatement stmt : writeCache) {
@@ -652,7 +658,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
          * TODO set the magic number in the configuration
          */
         int size = writeCache.size();
-        if (size >= 1000)
+        if (size >= 100)
           flush();
       }
 
